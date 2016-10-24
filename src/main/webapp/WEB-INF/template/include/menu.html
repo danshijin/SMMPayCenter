@@ -1,0 +1,26 @@
+<div class="page-sidebar-wrapper">
+	<div class="page-sidebar navbar-collapse collapse" id="mymenu">
+		<ul class="page-sidebar-menu page-sidebar-menu-compact" data-keep-expanded="false" data-auto-scroll="true" data-slide-speed="200">
+			<#if parentMenuList??>
+				<#list parentMenuList as menu>
+					<#if menu ?? && menu.level == 1>
+						<li  class="start active" id="menu-${menu.order}" >
+							<a href="javascript:;"><i class="fa ${menu.cssClass!''}"></i><span class="title">${menu.menuName!''}</span><span class="arrow" id="selem-${menu.order}"></span></a>
+							<ul class="sub-menu">
+								<#if menu.childMenu ??>
+									<#list menu.childMenu as childMenu>
+										<li class="selected" id="menu-${menu.order}-${childMenu.order}">
+											<a  href="#" onclick="gotoMenu('${menu.order}','${childMenu.order}','${request.getContextPath()}${childMenu.menuUrl!''}')">
+											<i></i>${childMenu.menuName!''}</a>
+										</li>
+									</#list>
+								</#if>
+							</ul>
+						</li>
+					</#if>
+				</#list>
+			</#if>
+		</ul>
+		<!-- END SIDEBAR MENU -->
+	</div>
+</div>

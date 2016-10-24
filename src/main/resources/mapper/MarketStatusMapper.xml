@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.IMarketStatusDao" >
+	<select id="getMarketStatus" resultType="int">
+		select open from tr_market_status;
+	</select>
+	
+	<update id="opentMarket">
+		update tr_market_status set open = 1;
+	</update>
+	
+	<update id="closeMarket">
+		update tr_market_status set open = 0;
+	</update>
+	
+	<insert id="insertLog" parameterType="com.smm.payCenter.domain.TrMarketLog">
+	
+		insert into tr_market_log(operator, operType)
+		values(#{operator},#{operType});
+	
+	</insert>
+	
+</mapper>

@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.smm.payCenter.dao.UserAccountDao">
+	<resultMap id="BaseResultMap" type="com.smm.payCenter.domain.UserAccountEntity">
+		<id column="user_Id" property="userId" jdbcType="INTEGER" />
+		<result column="user_Name" property="userName" jdbcType="VARCHAR" />
+		<result column="id_Card_Url" property="idCardUrl" jdbcType="VARCHAR" />
+		<result column="company_Addr" property="companyAddr" jdbcType="VARCHAR" />
+		<result column="certificate_No" property="certificateNo"
+			jdbcType="VARCHAR" />
+		<result column="certificate_Url" property="certificateUrl"
+			jdbcType="VARCHAR" />
+		<result column="registery_Certificate_Url" property="registeryCertificateUrl"
+			jdbcType="VARCHAR" />
+		<result column="company_Post_Code" property="companyPostCode"
+			jdbcType="VARCHAR" />
+		<result column="company_Name" property="companyName" jdbcType="VARCHAR" />
+		<result column="phone" property="phone" jdbcType="VARCHAR" />
+		<result column="mobile_Phone" property="mobilePhone" jdbcType="VARCHAR" />
+		<result column="contact_Name" property="contactName" jdbcType="VARCHAR" />
+		<result column="mall_user_name" property="mallId" jdbcType="VARCHAR" />
+		<result column="audit_Id" property="auditId" jdbcType="VARCHAR" />
+		<result column="audit_status" property="auditStatus" jdbcType="VARCHAR" />
+		<result column="audit_Time" property="auditTime" jdbcType="VARCHAR" />
+		<result column="freeze_Money" property="freezeMoney" jdbcType="VARCHAR" />
+		<result column="use_Money" property="useMoney" jdbcType="VARCHAR" />
+		<result column="register_Ip" property="registerIp" jdbcType="VARCHAR" />
+		<result column="register_Time" property="registerTime"
+			jdbcType="VARCHAR" />
+		<result column="last_Login_Ip" property="lastLoginIp" jdbcType="VARCHAR" />
+		<result column="last_Login_Time" property="lastLoginTime"
+			jdbcType="VARCHAR" />
+		<result column="sumMoney" property="sumMoney"
+			jdbcType="VARCHAR" />
+	    <result column="login_num" property="loginNum"
+			jdbcType="INTEGER" />	
+		<result column="three_certificates_url" property="threeCertificatesUrl"
+			jdbcType="VARCHAR" />
+		<result column="bank_open_url" property="bankOpenUrl"
+			jdbcType="VARCHAR" />
+		<result column="is_common" property="isCommon"
+			jdbcType="INTEGER" />
+	</resultMap>
+
+	<!-- 查询会员列表 -->
+	<select id="vipLsit" parameterType="com.smm.payCenter.domain.UserAccountEntity"
+		resultMap="BaseResultMap">
+
+		SELECT u.user_id,
+		u.user_id,
+		u.user_name,
+		u.PASSWORD,
+		u.id_card_url,
+		u.company_addr,
+		u.certificate_no,
+		u.certificate_url,
+		u.registery_certificate_url,
+		u.company_post_code,
+		u.company_name,
+		u.phone,
+		u.mobile_phone,
+		u.contact_name,
+		u.mall_user_name,
+		u.audit_id,
+		u.audit_time,
+		u.audit_status,
+		u.freeze_money,
+		u.use_money,
+		u.register_ip,
+		u.register_time,
+		u.last_login_ip,
+		u.last_login_time,
+		u.login_num,
+		upc.user_account_no AS userAccountNo
+		FROM
+		user_account u  left join  user_pay_channel upc
+		on  u.user_id = upc.user_id and upc.pay_channel_id='10001'
+		where
+		1=1
+		<if test="auditStatus!=null">
+
+			and u.audit_status =${auditStatus}
+		</if>
+		<if test="userName!=null and  userName!='' ">
+
+			and user_Name like '%${userName}%'
+		</if>
+		<if test="companyName!=null and   companyName!='' ">
+
+			and company_Name like '%${companyName}%'
+		</if>
+		<if test="mobilePhone!=null and mobilePhone!='' ">
+
+			and mobile_Phone like '%${mobilePhone}%'
+		</if>
+		<if test="bankNO!=null and bankNO!=''">
+			and u.user_id in ( SELECT user_id FROM user_bind_bank WHERE
+			bank_account_no LIKE '%${bankNO}%')
+		</if>
+		<if test="statusDate!=null and statusDate!=''">
+			and register_time &gt;= #{statusDate}
+		</if>
+		<if test="endDate!=null and endDate!=''">
+			and register_time &lt;= #{endDate}
+		</if>
+		 ORDER BY u.user_id desc 
+		<if test="startNum!=null and endNum !=null ">
+			        	limit ${startNum},${endNum}
+			        </if>
+	</select>
+	<!-- 查询会员详情 -->
+	<select id="vipDetaials" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+		SELECT 
+		uc.user_id,
+		uc.user_name,
+		uc.PASSWORD,
+		uc.id_card_url,
+		uc.company_addr,
+		uc.certificate_no,
+		uc.certificate_url,
+		uc.registery_certificate_url,
+		uc.company_post_code,
+		uc.company_name,
+		uc.phone,
+		uc.mobile_phone,
+		uc.contact_name,
+		uc.mall_user_name,
+		uc.audit_id,
+		uc.audit_time,
+		uc.audit_status,
+		uc.freeze_money,
+		uc.use_money,
+		uc.register_ip,
+		uc.register_time,
+		uc.last_login_ip,
+		uc.last_login_time,
+		uc.login_num,
+		uc.authorize_url as authorizeUrl,
+		upc.user_account_no AS userAccountNo,
+		(uc.freeze_Money+uc.use_Money) as sumMoney,
+		uc.three_certificates_url,
+		uc.bank_open_url,
+		uc.is_common
+		FROM user_account uc left join  user_pay_channel upc
+		on  uc.user_id = upc.user_id and upc.pay_channel_id='10001' where 
+		uc.user_id =${value}
+	</select>
+	<!-- 会员 银行信息 -->
+	<select id="useraccountBank" parameterType="java.lang.Integer"
+		resultType="com.smm.payCenter.domain.UserAccountBanEntity">
+
+		SELECT bind_id AS bindId,user_id AS userId,bank_name AS
+		bankName
+		,bank_Account_No as bankAccountNo,audit_status AS auditStatus
+		FROM
+		user_bind_bank WHERE user_id=${value}
+	</select>
+
+
+	<!-- -会员审核 -->
+	<update id="useraccoutshenhe" parameterType="com.smm.payCenter.domain.UserAccountEntity">
+		UPDATE user_account
+		SET audit_status=#{auditStatus} ,audit_id=#{auditId},audit_time=now()
+		WHERE user_id=${userId}
+
+	</update>
+	<!-- 添加会员支付帐号信息 -->
+	<insert id="addUserPayChannel" parameterType="com.smm.payCenter.domain.UserPayChannel">
+
+		INSERT INTO user_pay_channel
+		(
+		user_id,
+		pay_channel_id,
+		user_account_no,
+		user_account_name,
+		user_account_status,
+		create_time
+		)
+		VALUES
+		(
+		#{userId},
+		(SELECT pay_channe_id  FROM da_pay_channel WHERE channel_name='中信银企直联'),
+		#{userAccountNo},
+		#{userAccountName},
+		#{userAccountStatus},		
+		now()
+		);
+	</insert>
+	
+
+	<!-- 会员列表 -->
+	<select id="getList" parameterType="com.smm.payCenter.domain.UserAccountEntity" resultType="com.smm.payCenter.domain.UserAccountEntity">
+		SELECT
+		  a.user_id userId,
+		  a.user_name userName,
+		  a.company_name companyName,
+		  a.use_money duseMoney,
+		  (a.freeze_money+a.use_money) countMoney,
+		  c.user_account_no userAccountNo
+		FROM user_account a,user_pay_channel c
+		WHERE a.user_id=c.user_id
+		AND a.audit_status=1
+		<if test="companyName !=null and companyName !='' "><!-- 企业名称-->
+			AND a.company_name like '%${companyName}%'
+		</if>
+		<if test="userName !=null and userName !='' "><!-- 企业邮箱-->
+			AND a.user_name like '%${userName}%'
+		</if>
+		<if test="mallUserName !=null and mallUserName !='' "><!-- 企业账号-->
+			AND a.mall_user_name like '%${mallUserName}%'
+		</if>
+		<if test="bankAccountNo !=null and bankAccountNo !='' "><!-- 银行账号-->
+			AND c.user_account_no like '%${bankAccountNo}%'
+		</if>
+		GROUP BY a.user_id
+		<if test="startNum!=null and endNum !=null ">
+	       	limit ${startNum},${endNum}
+	    </if> 
+	</select>
+	<!-- 会员列表总记录数 -->
+	<select id="getSize" parameterType="com.smm.payCenter.domain.UserAccountEntity" resultType="java.lang.Integer">
+		SELECT
+		  COUNT(a.user_id)
+		FROM (SELECT
+		        a.user_id
+		      FROM user_account a,
+		        user_pay_channel c
+		      WHERE a.user_id = c.user_id
+		          AND a.audit_status = 1
+		<if test="companyName !=null and companyName !='' "><!-- 企业名称-->
+			AND a.company_name like '%${companyName}%'
+		</if>
+		<if test="userName !=null and userName !='' "><!-- 企业邮箱-->
+			AND a.user_name like '%${userName}%'
+		</if>
+		<if test="mallUserName !=null and mallUserName !='' "><!-- 企业账号-->
+			AND a.mall_user_name like '%${mallUserName}%'
+		</if>
+		<if test="bankAccountNo !=null and bankAccountNo !='' "><!-- 银行账号-->
+			AND c.user_account_no like '%${bankAccountNo}%'
+		</if>
+		 GROUP BY a.user_id) a
+	</select>
+	<!-- 修改会员账号表余额 -->
+	<update id="updateUserAccount" parameterType="java.util.Map">
+		UPDATE user_account SET use_money=${countMoney} WHERE user_id=${userId}
+	</update>
+	<!-- 修改会员支付通道可用余额 -->
+	<update id="updateUserPayChannel" parameterType="java.util.Map">
+		UPDATE user_pay_channel SET use_money=${countMoney} WHERE user_id=${userId}
+	</update>
+	<!-- 交易记录表新增一条记录 -->
+	<insert id="insertTrRecord" parameterType="java.util.Map">
+	INSERT INTO tr_record 
+	( 
+	tr_money, 
+	tr_type, 
+	tr_apply_time, 
+	tr_apply_status,
+	tr_charge,
+	user_money, 
+	user_id, 
+	user_pay_channel_id, 
+	user_company_name, 
+	note
+	)
+	VALUES(
+	#{tr_money},
+	#{tr_type},
+	#{tr_apply_time},
+	#{tr_apply_status},
+	0.00,
+	#{user_money},
+	#{user_id},
+	#{user_pay_channel_id},
+	#{user_company_name},
+	#{note})
+	</insert>
+	
+
+	<insert id="insertTrCashApply" useGeneratedKeys="true" keyProperty="id" parameterType="com.smm.payCenter.domain.TrCashApply">
+		INSERT INTO tr_cash_apply 
+		(
+		cash_bank_id, 
+		counter_fee, 
+		cash_money, 
+		cash_bank_no, 
+		cash_bank_name, 
+		cash_bank_cnaps, 
+		cash_type, 
+		user_id, 
+		user_email, 
+		user_company_name, 
+		user_use_money, 
+		user_freeze_money, 
+		apply_time, 
+		replay_time, 
+		apply_remark, 
+		apply_status, 
+		replay_status, 
+		replay_user_id, 
+		pay_channel_id, 
+		pay_channel_user_account
+		)
+		VALUES
+		(
+		#{cash_bank_id}, 
+		#{counter_fee}, 
+		#{cash_money}, 
+		#{cash_bank_no}, 
+		#{cash_bank_name}, 
+		#{cash_bank_cnaps}, 
+		#{cash_type}, 
+		#{user_id}, 
+		#{user_email}, 
+		#{user_company_name}, 
+		#{user_use_money}, 
+		#{user_freeze_money}, 
+		#{apply_time}, 
+		#{replay_time}, 
+		#{apply_remark}, 
+		#{apply_status}, 
+		#{replay_status}, 
+		#{replay_user_id}, 
+		#{pay_channel_id}, 
+		#{pay_channel_user_account}
+		)
+	</insert>
+	
+	<!-- 查询公司名称和用户支付渠道ID 当前支付渠道ID=1 是指中信银行 -->
+	<select id="getById" parameterType="Integer" resultType="com.smm.payCenter.domain.UserAccountEntity">
+		SELECT a.company_name companyName,a.user_name userName,a.company_name companyName,a.freeze_money freezeMoney,a.use_money useMoney,user_pay_channel_id userPayChannelId,
+				c.user_account_no userAccountNo
+		from user_account a,user_pay_channel c 
+		where  a.user_id=c.user_id and a.user_id=#{user_id} and c.pay_channel_id=10001
+	</select>
+	<!-- 根据账户id查询账户信息 -->
+	<select id="getUserAccountById" parameterType="Integer" resultType="com.smm.payCenter.domain.UserAccountEntity">
+		select use_money useMoney from user_account a 
+		where a.user_id=#{user_id}
+	</select>
+	<!-- 平台出金列表 -->
+	<select id="getDebitsList" parameterType="com.smm.payCenter.domain.UserAccountEntity" resultType="com.smm.payCenter.domain.UserAccountEntity">
+		SELECT 	a.user_id userId, 
+			a.user_name userName, 
+			a.id_card_url idCardUrl, 
+			a.company_addr companyAddr, 
+			a.certificate_no certificateNo, 
+			a.certificate_url certificateUrl, 
+			a.registery_certificate_url registeryCertificateUrl, 
+			a.company_post_code companyPostCode, 
+			a.company_name companyName, 
+			a.phone, 
+			a.mobile_phone mobilePhone, 
+			a.contact_name contactName, 
+			a.mall_user_name mallUserName, 
+			a.audit_id auditId, 
+			a.audit_time auditTime, 
+			a.audit_status auditStatus, 
+			a.freeze_money freezeMoney, 
+			a.use_money useMoney, 
+			a.register_ip registerIp, 
+			a.register_time registerTime, 
+			a.last_login_ip lastLoginIp, 
+			a.last_login_time lastLoginTime,
+			(a.freeze_money+a.use_money) countMoney
+		FROM user_account a
+		WHERE a.audit_status=1
+		<if test="userName !=null and userName !='' "><!-- 企业账号-->
+			AND a.user_name like '%${userName}%'
+		</if>
+		<if test="companyName !=null and companyName !='' "><!-- 公司名称-->
+			AND a.company_name like '%${companyName}%'
+		</if>
+		<if test="mobilePhone !=null and mobilePhone !='' "><!-- 手机号-->
+			AND a.mobile_phone like '%${mobilePhone}%'
+		</if>
+		GROUP BY a.register_time DESC
+	</select>
+	<select id="getUserBindBank"  parameterType="Integer" resultType="com.smm.payCenter.domain.UserAccountBanEntity">
+		SELECT 	bind_id bindId, 
+				user_id userId, 
+				bank_id bankId, 
+				bank_name bankName, 
+				draw_money drawMoney, 
+				bank_type_id bankTypeId, 
+				bank_type banktype, 
+				bank_account_no bankAccountNo, 
+				cnaps cnaps, 
+				is_payment isPayment
+		FROM 	user_bind_bank 
+		WHERE audit_status=1
+		AND 	user_id=#{userId}
+	</select>
+	<select id="getBindBankById"  parameterType="Integer" resultType="com.smm.payCenter.domain.UserAccountBanEntity">
+		SELECT 	bind_id bindId, 
+				user_id userId, 
+				bank_id bankId, 
+				bank_name bankName, 
+				draw_money drawMoney, 
+				bank_type_id bankTypeId, 
+				bank_type banktype, 
+				bank_account_no bankAccountNo, 
+				cnaps cnaps, 
+				is_payment isPayment
+		FROM 	user_bind_bank 
+		WHERE audit_status=1
+		AND bind_id=#{bindId}	
+	</select>
+	
+	<select id="queryUserAccountByParam" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.UserAccount">
+		
+		SELECT a.* FROM user_account a
+
+		INNER JOIN user_pay_channel b ON a.user_id = b.user_id
+		
+		WHERE  b.user_account_no = #{userAccountNo}
+		
+	</select>
+	<!-- 修改用户状态为关闭 -->
+	<update id="updateUserStatus" parameterType="java.util.Map">
+  		UPDATE user_account uc SET uc.audit_status = 2,audit_id=#{accountId},audit_time=now() WHERE uc.user_id = #{userid}
+    </update>
+	
+    <!-- 根据用户ID查询支付渠道信息 -->
+    <select id="queryUserPayChannelByUserId" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.UserPayChannel">
+		SELECT up.user_pay_channel_id AS userPayChannelId FROM user_pay_channel up WHERE up.user_id = #{userid}
+	</select>
+	<!-- 修改用户支付渠道状态为关闭 -->
+	<update id="updateUserPayChannelStatus" parameterType="java.util.Map">
+  		UPDATE user_pay_channel SET user_account_status = 1 WHERE user_pay_channel_id = #{channelid}
+    </update>
+    
+    <!-- 查询用户银行卡信息 -->
+    <select id="queryUserBank" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.UserAccountBanEntity">
+		SELECT bind_id AS bindId FROM user_bind_bank WHERE user_id = #{userid}
+	</select>
+	
+	<!-- 修改银行卡状态为关闭 -->
+	<update id="updateUserBankStatus" parameterType="java.util.Map">
+  		UPDATE user_bind_bank SET audit_status = 2 WHERE bind_id = #{bankid}
+    </update>
+    <!-- 修改会员信息 -->
+    <update id="saveUserAccount" parameterType="com.smm.payCenter.domain.UserAccountEntity"  >
+    UPDATE user_account 
+	SET
+	user_id =#{userId}
+	<if test="companyAddr!=null and  companyAddr!=''">
+	,company_addr = #{companyAddr}  
+	</if>
+	<if test="companyPostCode!=null and  companyPostCode!=''">
+	,company_post_code =#{companyPostCode}
+	</if>
+	<if test="certificateNo!=null and  certificateNo!=''">	
+	,certificate_No = #{certificateNo} 
+	</if>
+	<if test="phone!=null and  phone!=''">
+	,phone = #{phone} 
+	</if>
+	<if test="mobilePhone!=null and  mobilePhone!=''">
+	,mobile_phone = #{mobilePhone} 
+	</if>
+	<if test="contactName!=null and contactName !=''">
+	,contact_Name = #{contactName}
+	</if>
+	
+	WHERE
+	user_id =#{userId} 
+    
+    </update>
+    
+    
+</mapper>

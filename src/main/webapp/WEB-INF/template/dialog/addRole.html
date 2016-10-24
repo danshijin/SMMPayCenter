@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- zTree 样式 -->
+<link
+	href="${request.getContextPath()}/Public/js/zTree/css/demo.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/js/zTree/css/zTreeStyle.css"
+	rel="stylesheet" type="text/css">
+<style type="text/css">
+
+.input-inline_text {
+    display: inline-block;
+    width: 150px;
+    vertical-align: middle;
+}
+.modal-footer {
+    padding: 15px;
+    text-align: center;
+}
+
+div.zTreeDemoBackground {
+    width: 150px;
+    height: 40px;
+    text-align: left;
+}
+</style>
+</head>
+<body>
+<!-- 模态窗口编辑模板 -->
+<form action="" id="myform" class="form-horizontal form-bordered" novalidate="novalidate" method="post">
+<!-- 窗口标题开始 -->
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+	<h4 class="modal-title">新增角色</h4>
+</div>
+<!-- 窗口标题结束-->
+<!-- 内容开始 -->
+<form role="form" class="form-horizontal" id="myFormItems" name="myFormItems">
+<div class="modal-body">
+	<div class="portlet-body form">
+		<div class="form-body">
+		  <div class="form-group">
+		    <label for="inputEmail3" class="col-sm-4 control-label">角色名称</label>
+		    <div class="col-sm-8">
+		      <input type="text" class="form-control input-inline_text" id="roleName" name="roleName" placeholder="角色名称" onblur="isName(this)">
+		    </div>
+		  </div>
+		  
+		  <div class="form-group">
+		    <label for="inputPassword3" class="col-sm-4 control-label">角色描述</label>
+		    <div class="col-sm-8">
+				<textarea class="form-control" rows="3" id="roleString" name="roleString" placeholder="角色描述"></textarea>
+		    </div>
+		  </div>
+		  
+		  <div class="form-group">
+		  	<label for="inputPassword3" class="col-sm-4 control-label">权限</label>
+			<div class="col-sm-8">
+				<div class="zTreeDemoBackground left">
+					<input id="authorization"  placeholder="选择角色权限" class="form-control" type="text" readonly value=""  onclick="showMenu();">
+					<div id="menuContent" class="menuContent" style="display:none; position: absolute;z-index: 1">
+						<ul id="treeDemo" class="ztree" style="margin-top:0; width:180px;"></ul>
+					</div>
+				</div>
+				<textarea id="authorizations"  rows="8"  placeholder="角色具有的权限" class="form-control" readonly="readonly"></textarea>
+			</div>
+		  </div>
+		</div>
+	</div>
+</div>
+<input name="ids" id="ids" type="hidden" value="">
+</form>
+
+<!-- 内容结束 -->
+<!-- 底部按钮开始 -->
+<div class="modal-footer">
+	<button type="button" class="btn red  fa fa-check" onclick="submitForm();"> 确认</button>
+	<button type="button" class="btn default fa fa-times" data-dismiss="modal"> 取消</button>
+</div>
+<!-- 结束 -->
+
+</form>
+
+</body>
+<!-- zTree 插件-->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.excheck-3.5.min.js"></script>
+<script>
+
+function submitForm(){
+	if($("#roleName").val()==null || $("#roleName").val()==""){
+		layer.alert('请输入角色名称!', {
+		    icon: 0,
+		    skin: 'layer-ext-moon' 
+		})
+		return false;
+	}
+	//后台提交
+	$.ajax({
+    		type: "POST",
+    		url: "${request.getContextPath()}/sysManager/addRoleAndAuthorization.do",
+    		data:{"roleName":$("#roleName").val(),"roleString":$("#roleString").val(),"menuIds":$("#ids").val()},
+    		dataType: "json",
+    		success: function(res){
+    			if(res.code=="success"){ 
+    				$(".editModal").modal('hide');
+    				$(".editModal").empty();
+   					CommonUtils.succModal2('系统提示','新增成功',"${request.getContextPath()}/sysManager/roleList.do");
+    			}
+    			else{
+    				CommonUtils.succModal('系统提示','新增失败',"${request.getContextPath()}/sysManager/roleList.do");
+    			}
+    		}
+   });
+}
+
+//定义树 
+var setting = {
+		async : {
+			enable : true,
+			type: "get",
+			url : "${request.getContextPath()}/sysManager/getTreeNode.do",//树节点初始化数据
+			error : function() {  
+                 alert('亲，资源加载失败！');  
+            }, 
+			autoParam : [ "id" ]
+		},
+		check: {
+			enable: true,
+			chkDisabledInherit:true
+		},
+        view: {
+            selectedMulti: true, //是否允许多选
+            autoCheckTrigger: true
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            /* beforeClick: beforeClick,
+            onClick: onClick, */
+            onCheck: onCheck,
+           // onAsyncSuccess: zTreeOnAsyncSuccess
+        }
+    };
+
+
+	function zTreeOnAsyncSuccess(){
+		 
+	 }
+	/* function onCheck(treeId, treeNode) {
+		alert(treeNode.id);
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+		zTree.checkNode(treeNode, !treeNode.checked, null, true);
+		
+		var str ='' ;
+		//选中父节点，获取所有子节点 
+	 	if(treeNode.isParent){
+        	 str = getAllChildrenNodes(treeNode,str);
+        	 $("input[name='ids']").attr("value", str);
+        	 return false;
+     	}
+		var id = $("input[name='ids']").val();
+		
+		//子节点
+		if(treeNode.checked){
+			$("input[name='ids']").attr("value", id+","+treeNode.id);
+		}else{
+			id = id.replace(","+treeNode.id,"");
+			$("input[name='ids']").attr("value", id);
+		}
+		
+		return false;
+	} */
+	
+	//获取所有子节点
+	function getAllChildrenNodes(treeNode,result){ 
+	    if (treeNode.isParent) { 
+	      var childrenNodes = treeNode.children; 
+	      if (childrenNodes) { 
+	          for (var i = 0; i < childrenNodes.length; i++) { 
+	           if(childrenNodes[i].isParent){
+	            result = getAllChildrenNodes(childrenNodes[i], result); 
+	           }else{
+	            result += ',' + childrenNodes[i].id; 
+	           }
+	          } 
+	      } 
+	  } 
+	  return result; 
+	}
+	
+	function onClick(e, treeId, treeNode) {
+        hideMenu();
+         return false;
+    }
+	
+	//选定节点之后，赋值 
+ 	function onCheck(e, treeId, treeNode) {
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+		nodes = zTree.getCheckedNodes(true),
+		v = "";
+		u = "";
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";//节点名称
+			u += nodes[i].id + ",";//节点id
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var cityObj = $("#authorizations");
+		cityObj.attr("value", v);
+		
+		if (u.length > 0 ) u = u.substring(0, u.length-1);
+		var cityObj = $("#ids");
+		cityObj.attr("value",u);
+	} 
+
+	function showMenu() {
+		var cityObj = $("#authorization");
+		var cityOffset = $("#authorization").position();
+		//alert(cityOffset.left + "px---"+cityOffset.top+ "px");
+		//$("#menuContent").css({left:"220px", top:"225px"}).slideDown("fast");
+		$("#menuContent").css({left:cityOffset.left+"px", top:cityOffset.top+cityObj.outerHeight()+"px"}).slideDown("fast");
+
+		$("body").bind("mousedown", onBodyDown);
+	}
+	function hideMenu() {
+		$("#menuContent").fadeOut("fast");
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "menuBtn" || event.target.id == "authorization" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+			hideMenu();
+		}
+	}
+
+	//树初始化
+	$(document).ready(function(){
+		$.fn.zTree.init($("#treeDemo"), setting);
+	});
+	
+	
+	/**
+	 * @param e 页面元素
+	 * @param arrParentid 页面元素e所在的iframe的数组
+	 * @param isID 参数arrParentid中是iframe的id还是object
+	 */
+	function getElementAbsPos(e,arrParentid,isID) 
+	{
+	    var t = e.offsetTop;
+	    var l = e.offsetLeft;
+	    while(e = e.offsetParent)
+	    {
+	        t += e.offsetTop;
+		l += e.offsetLeft;
+	    }
+	    if(arguments.length >= 2)
+	    {
+	        for(var i=0; i<arrParentid.length; i++)
+	        {
+	            e = (isID==true) ? top.document.getElementById(arrParentid[i]) : arrParentid[i];
+	            t += e.offsetTop;
+		    l += e.offsetLeft;
+	            while(e = e.offsetParent)
+	            {
+	                t += e.offsetTop;
+			l += e.offsetLeft;
+	            }
+	        }
+	    }
+	    
+	    return {left:l,top:t};
+	}
+
+</script>
+</html>

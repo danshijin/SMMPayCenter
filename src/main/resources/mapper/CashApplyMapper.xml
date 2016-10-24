@@ -1,0 +1,184 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.CashApplyDao">
+
+	<resultMap id="BaseResultMap" type="com.smm.payCenter.domain.CashApply">
+		<id column="id" jdbcType="INTEGER" property="id" />
+		<result column="cash_bank_id" jdbcType="VARCHAR" property="cashBankId" />
+		<result column="cash_money" jdbcType="DECIMAL" property="cashMoney" />
+		<result column="counter_fee" jdbcType="VARCHAR" property="counterFee" />
+		<result column="cash_bank_no" jdbcType="VARCHAR" property="cashBankNo" />
+		<result column="cash_bank_cnaps" jdbcType="VARCHAR" property="cashBankCnaps" />
+		<result column="cash_type" jdbcType="INTEGER" property="cashType" />
+		<result column="cash_bank_name" jdbcType="VARCHAR" property="cashBankName" />
+		<result column="user_id" jdbcType="INTEGER" property="userId" />
+		<result column="user_email" jdbcType="VARCHAR" property="userEmail" />
+		<result column="user_company_name" jdbcType="VARCHAR" property="userCompanyName" />
+		<result column="user_use_money" jdbcType="DECIMAL" property="userUseMoney" />
+		<result column="user_freeze_money" jdbcType="DECIMAL" property="userFreezeMoney" />
+		<result column="apply_time" jdbcType="VARCHAR" property="applyTime" />
+		<result column="replay_time" jdbcType="VARCHAR" property="replayTime" />
+		<result column="audit_id" jdbcType="INTEGER" property="auditId" />
+		<result column="audit_time" jdbcType="VARCHAR" property="auditTime" />
+		<result column="apply_remark" jdbcType="INTEGER" property="applyRemark" />
+		<result column="apply_status" jdbcType="INTEGER" property="applyStatus" />
+		<result column="replay_status" jdbcType="INTEGER" property="replayStatus" />
+		<result column="replay_user_id" jdbcType="INTEGER" property="replayUserId" />
+		<result column="pay_channel_id" jdbcType="INTEGER" property="payChannelId" />
+		<result column="verify_code" jdbcType="VARCHAR" property="verifyCode" />
+		<result column="cash_no" jdbcType="VARCHAR" property="cashNo" />
+		<result column="pay_Channel_User_Account" jdbcType="VARCHAR"
+			property="payChannelUserAccount" />
+		<result column="smm_freeze_money" jdbcType="DECIMAL"
+			property="smmFreezeMoney" />
+			<result column="bank_type_id" jdbcType="VARCHAR"
+			property="bankTypeId" />
+		<result column="user_pay_channel_id" jdbcType="INTEGER" property="userPayChannelId" />
+		<result column="user_account_no" jdbcType="VARCHAR"
+			property="userAccountNo" />	
+			
+			
+	</resultMap>
+
+	<!-- 查询出金记录 -->
+	<select id="queryCashApply" parameterType="com.smm.payCenter.domain.CashApply"
+		resultMap="BaseResultMap">
+
+		SELECT
+		c.id,
+		c.cash_bank_id,
+		c.counter_fee,
+		c.cash_money,
+		c.cash_bank_no,
+		c.cash_bank_name,
+		c.cash_bank_cnaps,
+		c.cash_type,
+		c.user_id,
+		c.user_email,
+		c.user_company_name,
+		c.user_use_money,
+		c.user_freeze_money,
+		c.apply_time,
+		c.replay_time,
+		c.apply_remark,
+		c.apply_status,
+		c.replay_status,
+		c.replay_user_id,
+		c.pay_channel_id,
+		c.pay_channel_user_account,
+		p.smm_freeze_money,
+		b.bank_type_id ,
+		c.cash_no,
+		p.user_pay_channel_id,
+		p.user_account_no
+		FROM tr_cash_apply c left
+		join user_pay_channel p on p.user_id=c.user_id and
+		c.pay_channel_id=p.pay_channel_id left join  user_bind_bank  b  on  c.cash_bank_id=b.bind_id
+		 where 1=1
+		<if test="companyName!=null and  companyName!=''">
+			and c.user_company_name like '%${companyName}%'
+		</if>
+		<if test="tradeId!=null and  tradeId!=''">
+			and c.cash_No like '%${tradeId}%'
+		</if>
+		<if test="startTime!=null and  startTime!=''">
+			and DATE_FORMAT(c.apply_time,'%Y-%m-%d') &gt;=
+			STR_TO_DATE(#{startTime},'%Y-%m-%d')
+		</if>
+		<if test="endTime!=null and  endTime!=''">
+			and DATE_FORMAT(c.apply_time,'%Y-%m-%d') &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d')
+		</if>
+		order by apply_time DESC
+		LIMIT ${startNum},${endNum}
+
+	</select>
+	<!-- 统计总记录数 -->
+	<select id="queryCashApplycount" parameterType="com.smm.payCenter.domain.CashApply"
+		resultType="java.lang.Integer">
+
+		SELECT
+		count(*)
+		FROM tr_cash_apply c where 1=1
+		<if test="companyName!=null and  companyName!=''">
+			and c.user_company_name like '%${companyName}%'
+		</if>
+		<if test="tradeId!=null and  tradeId!=''">
+			and c.id like '%${tradeId}%'
+		</if>
+		<if test="startTime!=null and  startTime!=''">
+			and DATE_FORMAT(c.apply_time,'%Y-%m-%d') &gt;=
+			STR_TO_DATE(#{startTime},'%Y-%m-%d')
+		</if>
+		<if test="endTime!=null and  endTime!=''">
+			and DATE_FORMAT(c.apply_time,'%Y-%m-%d') &lt;=
+			STR_TO_DATE(#{endTime},'%Y-%m-%d')
+		</if>
+		order by apply_time DESC
+	</select>
+
+	<!-- 修改出金状态 -->
+	<update id="updateapplyStatus" parameterType="com.smm.payCenter.domain.CashApply">
+		UPDATE
+		tr_cash_apply SET apply_status=#{applyStatus} WHERE id=#{id}
+
+	</update>
+
+	<!-- 出金 退回 -->
+	<update id="updateUserPayChannel" parameterType="com.smm.payCenter.domain.CashApply">
+
+		UPDATE user_pay_channel p SET smm_freeze_money =
+		smm_freeze_money-#{cashMoney}-#{counterFee},
+		use_money = p.use_money+#{cashMoney}+#{counterFee}
+		WHERE p.user_id= #{userId} AND pay_channel_id =#{payChannelId};
+
+	</update>
+	<!-- -->
+	<update id="updateUserAccount" parameterType="com.smm.payCenter.domain.CashApply">
+		UPDATE user_account
+		u SET use_money = u.use_money+#{cashMoney}+#{counterFee} where u.user_id=#{userId};
+	</update>
+	<!--  -->
+
+
+	<!-- 查询出金记录 ID -->
+	<select id="queryCashApplyId" parameterType="java.lang.Integer"
+		resultMap="BaseResultMap">
+
+		SELECT
+		c.id,
+		c.cash_bank_id,
+		c.counter_fee,
+		c.cash_money,
+		c.cash_bank_no,
+		c.cash_bank_name,
+		c.cash_bank_cnaps,
+		c.cash_type,
+		c.user_id,
+		c.user_email,
+		c.user_company_name,
+		c.user_use_money,
+		c.user_freeze_money,
+		c.apply_time,
+		c.replay_time,
+		c.apply_remark,
+		c.apply_status,
+		c.replay_status,
+		c.replay_user_id,
+		c.pay_channel_id,
+		c.pay_channel_user_account,
+		p.smm_freeze_money,
+		b.bank_type_id ,
+		c.cash_no,
+		p.user_pay_channel_id,
+		p.user_account_no,
+		c.verify_code
+		FROM tr_cash_apply c left
+		join user_pay_channel p on p.user_id=c.user_id and
+		c.pay_channel_id=p.pay_channel_id left join  user_bind_bank  b  on  c.cash_bank_id=b.bind_id
+		where id=#{id}
+	</select>
+
+
+
+</mapper>

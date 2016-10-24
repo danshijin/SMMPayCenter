@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>每日结算</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="" name="description">
+<meta content="" name="author">
+<link href="${request.getContextPath()}/Public/assets/admin/css/css.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/simple-line-icons/simple-line-icons.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/uniform/css/uniform.default.css"
+	rel="stylesheet" type="text/css">
+
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/components-rounded.css"
+	id="style_components" rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/plugins.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/layout.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/themes/default.css"
+	rel="stylesheet" type="text/css" id="style_color">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/custom.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css"
+	rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css"
+	href="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.css" />
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/common.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/kkpager.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.css"
+	rel="stylesheet" type="text/css" />
+<link rel="shortcut icon"
+	href="${request.getContextPath()}/Public/favicon.ico">
+	<!-- pandora-dialog 弹层组件样式 -->
+<link
+	href="${request.getContextPath()}/Public/js/pandora/css/dialog.css"
+	rel="stylesheet" type="text/css">
+<!-- select2控件样式 -->
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.css"
+	rel="stylesheet" type="text/css">
+<script>
+	BASE_URL = '${request.getContextPath()}'
+</script>
+<style type="text/css">
+
+.nav> li > a {
+    text-shadow: none;
+    color: red;
+    font-size: 22px;
+}
+.datepicker {
+	font-size: 16px;
+}
+
+.datepicker td, .datepicker th {
+	width: 14.28571428571429%;
+	height: 40px;
+}
+
+.table-condensed {
+	width: 100%;
+}
+
+.datepicker-inline {
+	width: 100%;
+}
+
+.col-md-4, .col-md-6, .col-md-7, .col-md-12 {
+	padding-right: 0px;
+	padding-left: 0px;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th,
+	.table>thead>tr>td, .table>thead>tr>th {
+	border-bottom: 1px solid #ddd;
+}
+.input-inline {
+    display: inline-block;
+    width: 315px;
+    vertical-align: middle;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover{
+    color: #EF0E0E;
+    cursor: default;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-bottom-color: transparent;
+}
+.nav>li>a{
+	text-shadow: none;
+    color: rgb(45, 41, 41);
+    font-size: 15px;
+}
+
+/* .navbar-default {
+    background-color: #CC5252;
+    border-color: #522121;
+} */
+
+</style>
+
+</head>
+<body class="page-header-top-fixed page-footer-fixed">
+	<!--头部信息结束 -->
+	<div class="page-header">
+		<!--头部开始-->
+		<#include "/include/top.html" />
+		<!-- 头部信息结束 -->
+	</div>
+	<!-- BEGIN PAGE CONTAINER -->
+	<div class="page-container">
+		<#include "/include/menu.html" />
+		<div class="page-content-wrapper">
+			<div class="page-content">
+				<div align="center">
+					<form action="" method="post" id="myForm">
+						<table>
+							<tr>
+								<td>
+									结算操作日期:<input disabled="disabled" type="text" name="date" id="date" value="${date}">
+									<button class="btn red"  type="button" onclick="meirijiesuan(${date})" >
+										<i class="fa fa-search"></i>确定
+									</button>
+								</td>
+							</tr>
+						</table>
+					</form>
+				</div><br><br>
+				<#if isMarketClose ??><script>alert("已经闭市");</script></#if>
+				<#if block ??>
+				<div align="center" style="display: block; ">
+					<span style="font-size: 25px;">已处理${upcList}条信息，共${upcList}条</span><br><br>
+					共导入入金记录${synCount}条<br>
+					跳过已有入金记录${skipCount}条<br>
+					附属帐户余额对比错误${excenum}条<br><br>
+					<table  border="1" style="width: 80%;">
+						<tr align="center">
+							<td width="25%" height="30px;">系统账户余额:</td>
+							<td width="25%">
+								<#if sysMoney ??>
+									￥${sysMoney?string(',###.##')}元
+								<#else>
+									￥0.00元
+								</#if>
+								
+							</td>
+							<td width="25%">银行实际账户余额:</td>
+							<td width="25%">
+								￥<span style="font-size: 15px;color: red">
+								<#if sysSJAMT ??>
+									${sysSJAMT?string(',###.##')}
+								<#else>
+									0.00
+								</#if>
+								</span>元
+							</td>
+						</tr>
+					</table><br>
+					<input style="width: 8%;height: 40px;" onclick="jiesuan()" type="button" value="系统余额调整"><br><br>
+					<!-- <a href="#" onclick="delcokie('${request.getContextPath()}/UserAccount/getUserList.do');" >
+                      		 系统余额调整
+                    </a>
+                     -->
+					<table  border="1" style="width: 80%;">
+						<tr align="center" height="30px;">
+							<td width="20%">序号</td>
+							<td width="20%">企业名称</td>
+							<td width="20%">系统账户余额</td>
+							<td width="20%">银行实际账户余额</td>
+							<td width="20%">操作</td>
+						</tr>
+						<#list excelist as exec>
+						<tr align="center" height="30px;">
+							<td>${exec.rownum}</td>
+							<td>${exec.useraccountname}</td>
+							<td>￥${exec.usermoney}元</td>
+							<td>￥<span style="font-size: 15px;color: red">
+							<#if exec.usersjamt ??>
+								${exec.usersjamt?string(',###.##')}
+							<#else>
+								0.00
+							</#if>
+							</span>元</td>
+							<td>
+							<a href="${request.getContextPath()}/capitalData/systemDataQuery.do" target="_blank" >
+								系统数据查询
+							</a>
+							 | 
+							<a href="${request.getContextPath()}/electric/electricList.do" target="_blank" > 
+								 电子回单
+							</a>
+							</td>
+						</tr>
+						</#list>
+					</table>
+				</div>
+				</#if>
+			</div>
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
+	<!-- 底部开始 -->
+	<#include "/include/foot.html" />
+	<!-- 底部结束 -->
+</body>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-migrate.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-ui/jquery-ui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/js/bootstrap.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.blockui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.cokie.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/uniform/jquery.uniform.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.js"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.sparkline.min.js"
+	type="text/javascript"></script>
+
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker-index.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/scripts/metronic.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/layout.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/commonUtils.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/highcharts.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/kkpager.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/My97DatePicker/WdatePicker.js"></script>
+<script src="${request.getContextPath()}/Public/js/moment/moment.js"
+	type="text/javascript"></script>
+	<!-- pandora-dialog 弹层组件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/pandora/pandora-dialog.js"></script>
+
+<!-- select2控件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2_locale_zh-CN.js"></script>
+	
+<!-- 脚本代码 -->
+<script type="text/javascript">
+
+	//资金解冻
+	function meirijiesuan(date) {
+	 	$.confirm("当日数据结算后，前台将关闭交易功能确定结算吗？", function () {
+	 		window.location.href="${request.getContextPath()}/everyDaySettlement/settle.do?date="+date;
+		});
+		return false;
+	}
+
+	$(function() {
+		Metronic.init(); // init metronic core componets
+		Layout.init(); // init layout
+		
+		//搜索下拉框
+		//toSelect2();
+		
+		//初始化分页插件	
+		toPage();
+	});
+
+	//分页
+	function toPage(){
+		function getParameter(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null)
+				return unescape(r[2]);
+			return null;
+		}
+		
+		var totalPage = $('#totalPage').val();
+		var totalRecords = $('#totalRecords').val();
+	
+		var pageNo = getParameter('pno');
+		if (!pageNo) {
+			pageNo = 1;
+		}
+		
+		//生成分页
+		//有些参数是可选的，比如lang，若不传有默认值
+		kkpager.generPageHtml({
+			pno : pageNo,
+			//总页码
+			total : totalPage,
+			//总数据条数
+			totalRecords : totalRecords,
+	
+			getLink : function(n) {
+				return this.hrefFormer + this.hrefLatter + "?pno=" + n+"&depotno="+$("#depotno").val()+"&ownerName="+$("#ownerName").val()+
+						"&satstatus="+$("#satstatus").val()+"&startTime="+$("#startTime").val()+"&endTime="+$("#endTime").val()+"&warehouse="+$("#warehouse").val()+"&watstatus="+$("#watstatus").val();
+			}
+		});
+	}
+
+	
+	function delcokie(url){
+		delCookie("parentMenu");
+		delCookie("childMenu");
+		window.location.href=url;
+	}
+	
+	function jiesuan(){
+		window.location.href="${request.getContextPath()}/UserAccount/getUserList.do";	
+	}
+</script>
+</html>

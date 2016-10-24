@@ -1,0 +1,115 @@
+<!-- 模态窗口编辑模板 -->
+<form action="" id="myform" class="form-horizontal form-bordered" novalidate="novalidate" method="post">
+<!-- 窗口标题开始 -->
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+	<h3 class="modal-title">附属账户余额调整
+	</h3>
+</div>
+<!-- 窗口标题结束-->
+<!-- 内容开始 -->
+<form role="form" class="form-horizontal" id="myFormItems" name="myFormItems">
+<div class="modal-body">
+	<div class="portlet-body form">
+		<div class="form-body">
+			<div class="form-group">
+			    <h4>银行实际余额：<font>￥ <#if bankFactMoney??>
+										${bankFactMoney}
+									<#else>
+									</#if>
+							</font>
+				</h4>
+				<input type="hidden" id="userId" value="${userId}">
+				<input type="hidden" id="bankFactMoney" value="${bankFactMoney}">
+				<input type="hidden" id="countMoneyOld" value="${countMoney}">
+				<input type="hidden" id="usercompanyName" value="${companyName}">
+				<label><h4>系统账户余额：
+					<input type="search" class="form-control input-medium  input-inline" id="countMoney" 
+					value="${countMoney}" aria-controls="sample_2" onkeyup='checkDecimal(this)' onblur="warningDiv();" >
+					元</h4>
+				</label>
+				<div style="display:none;" id="showLog"><h4 id="warningText" style="color: red;"></h4></div>				
+			</div>
+		</div>
+	</div>
+</div>
+</form>
+<p>
+  <button type="button" class="btn red" onclick="submitForm();" style="margin-left: 200px;">提交</button>
+  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+</p>
+<!-- 结束 -->
+</form>
+<!-- 业务处理开始 -->
+<script>
+
+	var record = {
+		num : ""
+	}
+	var checkDecimal = function(n) {
+		$('#showLog').hide();
+		var decimalReg = /^\d{0,8}\.{0,1}(\d{1,4})?$/;//var decimalReg=/^[-\+]?\d{0,8}\.{0,1}(\d{1,2})?$/; 
+		if (n.value != "" && decimalReg.test(n.value)) {
+			record.num = n.value;
+		} else {
+			if (n.value != "") {
+				n.value = record.num;
+			}
+		}
+	}
+	function warningHide(){
+		$('#warningText').text("");
+		$('#showLog').hide();
+	}	
+	function warningDiv() {
+		var countMoneyOld = $('#countMoneyOld').val();
+		var countMoney = $('#countMoney').val();
+		if (Number(countMoneyOld) == Number(countMoney)) {
+			$('#warningText').text("系统账户余额未做修改！");
+			$('#showLog').show();
+			return false;
+		}
+		
+		if(countMoney==null || countMoney==''){
+			$('#warningText').text("请输入系统账户余额！");
+			$('#showLog').show();
+			return false;
+		}
+		return true;
+	}
+	function submitForm() {
+		if(!warningDiv()){
+			return false;
+		}
+		var userId = $('#userId').val();
+		var bankFactMoney = $('#bankFactMoney').val();
+		var countMoney = $('#countMoney').val();
+		var countMoneyOld = $('#countMoneyOld').val();
+		var companyName =$('#usercompanyName').val();
+		//后台提交
+		$.ajax({
+			type : "POST",
+			url : BASE_URL + "/UserAccount/update.do",
+			data : {
+				"userId" : userId,
+				"bankFactMoney" : bankFactMoney,
+				"countMoney" : countMoney,
+				"countMoneyOld" : countMoneyOld,
+				"companyName":companyName
+			},
+			dataType : "json",
+			success : function(res) {
+				if (res.code == "succ") {
+					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal2('系统提示', '处理成功', BASE_URL
+							+ '/UserAccount/getUserList.do');
+				} else {
+					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal('系统提示', '处理失败');
+				}
+			}
+		});
+	}
+</script>

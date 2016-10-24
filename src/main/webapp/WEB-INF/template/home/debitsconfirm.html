@@ -1,0 +1,109 @@
+<!-- 模态窗口编辑模板 -->
+<form action="" id="myform" class="form-horizontal form-bordered" novalidate="novalidate" method="post">
+<!-- 窗口标题开始 -->
+<div class="modal-header" style="height: 150px;">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+	<h2 class="modal-title" style="color: 61636c;">
+		<#if trstatus?? && trstatus=1>
+			是否确认同意出金？
+		</#if>
+		<#if trstatus?? && trstatus=2>
+			是否确认关闭该笔出金请求？
+		</#if>
+		<#if trstatus?? && trstatus=3>
+			是否确认冻结资金？
+		</#if>
+		<#if trstatus?? && trstatus=4>
+			是否确认关闭此笔冻结资金？
+		</#if>
+	</h2>
+<!-- 结束 -->
+<input type="hidden" id="trid" value="${trid}">
+<input type="hidden" id="trstatus" value="${trstatus}">
+<input type="hidden" id="payid" value="${payid}">
+<input type="hidden" id="money" value="${money}">
+<input type="hidden" id="companyName" value="${companyName}">
+
+</div>
+<!-- 窗口标题结束-->
+<!-- 底部按钮开始 -->
+<p>
+  <button type="button" class="btn red" onclick="submitForm();" style="margin-left: 200px;">提交</button>
+  <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+</p>
+
+</form>
+<!-- 业务处理开始 -->
+<script>
+
+function submitForm(){
+	var trstatus=$('#trstatus').val();
+	if(trstatus == 1 || trstatus == 2) {
+		var trid=$('#trid').val();
+		var companyName=$('#companyName').val();
+		var money=$('#money').val();
+		$.ajax({
+			type : "POST",
+			url: BASE_URL+"/TrRecord/update.do",
+			dataType:"json",
+			data :{"trid":trid,"trstatus":trstatus,"companyName":companyName,"money":money},
+			success : function(res) {
+				if(res.code=="succ"){ 
+					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal2('系统提示','处理成功',BASE_URL+'/TrRecord/debitsVettedList.do');
+				}
+				else {
+					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal('系统提示',res.msg);
+				}
+			},
+			error:function(data){
+				$(".editModal").modal('hide');
+				$(".editModal").empty();
+				CommonUtils.succModal('系统提示',res.msg);
+			}
+		});
+	}
+	if(trstatus == 3) {
+		var payid=$('#payid').val();
+		var companyName=$('#companyName').val();
+		var money=$('#money').val();
+		
+		var url=BASE_URL+"/payFreeze/freezeMoney.do"
+		$.ajax({
+			type : "POST",
+			url : url,
+			dataType:"json",
+			data :{
+				"paymentid":payid,
+				"companyName":companyName,
+				"money":money
+			},
+			success : function(data) {
+				if(data.info == "success"){
+					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal2('系统提示','处理成功',BASE_URL+'/payFreeze/freezeList.do');
+ 				}else {
+ 					$(".editModal").modal('hide');
+					$(".editModal").empty();
+					CommonUtils.succModal2('系统提示',data.info,BASE_URL+'/payFreeze/freezeList.do');
+ 				}
+			},
+			error:function(data){
+				$(".editModal").modal('hide');
+				$(".editModal").empty();
+				CommonUtils.succModal2('系统提示','error',BASE_URL+'/payFreeze/freezeList.do');
+			}
+		});
+	}
+	if(trstatus == 4){
+		var payid=$('#payid').val();
+		var companyName=$('#companyName').val();
+		var money=$('#money').val();
+		window.location.href=BASE_URL+"/payFreeze/freezeList.do?paymentid="+payid+"&companyName="+companyName+"&money="+money;
+	}
+}
+</script>

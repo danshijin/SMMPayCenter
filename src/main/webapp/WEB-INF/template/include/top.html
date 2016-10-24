@@ -1,0 +1,156 @@
+<style>
+	.nav > li > a:focus, .nav > li > a:hover {
+	    text-decoration: none;
+	    background-color: rgb(221, 90, 88);
+	}
+	.nav>li>a{
+		text-shadow: none;
+	    color: rgb(45, 41, 41);
+	    font-size: 15px;
+	}
+	.loginOut a:hover {
+	  color: rgba(161, 140, 140, 1);
+	}
+	.page-header {
+	   padding-bottom: 0px; 
+	   margin: 0px 0 20px; 
+	   border-bottom: 0px solid #eee;
+	}
+	.page-header {
+  	  opacity: 1 ;
+	  filter: alpha(opacity=100) ;
+	  width: 100%;
+	  margin: 0;
+	  border: 0;
+	  padding: 0;
+	  box-shadow: none;
+	  height: 75px;
+	  background-image: none;
+	  /* Header container */
+	  /* Fixed header */
+	  /* Static header */
+	  /* Page Header Top */
+	  /* Page Header Menu */
+	}
+	.page-header:before, .page-header:after {
+	  content: " ";
+	  display: table;
+	}
+	.page-header:after {
+	  clear: both;
+	}
+	.page-header .container,
+	.page-header .container-fluid {
+	  position: relative;
+	}
+	.page-header.navbar-fixed-top {
+	  z-index: 9995;
+	}
+	.page-header.navbar-static-top {
+	  z-index: 9995;
+	}
+	.page-header .page-header-top {
+	  height: 75px;
+	  /* Header logo */
+	  /* Top menu */
+	  /* Menu Toggler */
+	}
+	.page-header .page-header-top.fixed {
+	  width: 100%;
+	  position: fixed;
+	  top: 0;
+	  left: 0;
+	  z-index: 9995;
+	}
+	.page-header .page-header-top .page-logo {
+	  float: left;
+	  display: block;
+	  width: 255px;
+	  height: 75px;
+	}
+	.page-header .page-header-top .page-logo .logo-default {
+	  margin: 11px 0 0 0;
+	  width: 355px;
+	}
+	.page-header .page-header-top .top-menu {
+	  margin: 13px 0 0;
+	  padding: 0;
+	  float: right;
+	}
+	.page-header .page-header-top .top-menu .navbar-nav {
+	  padding: 0;
+	  margin-right: 0;
+	  display: block;
+	  /* Top Links */
+	  /* Separator */
+	  /* Extended Dropdowns */
+	  /* Notification */
+	  /* Inbox */
+	  /* Tasks */
+	  /* User */
+	  /* Language */
+	  /* Dark version */
+	}
+</style>
+<!--头部信息结束 -->
+<div class="page-header-top" style="background:#dd5a58">
+    <div class="container-fluid">
+        <!-- LOGO开始 -->
+        <div class="page-logo" style="padding-top: 8px;">
+            <a onclick="loginSucc()" ><img src="${request.getContextPath()}/Public/assets/admin/img/logo4.png" alt="logo" class="logo-default"/></a>
+        </div>
+        
+        <a href="javascript:;" class="menu-toggler"></a>
+
+        <div class="top-menu">
+            <ul class="nav navbar-nav pull-right" id="chats">
+            	<li class="dropdown dropdown-user dropdown-dark">
+                	  <span style="color: rgb(255, 251, 240);">你好</span>
+                      <!-- <img alt="" class="img-circle" src="${request.getContextPath()}/Public/assets/admin/img/avatar9.jpg"> -->
+                      <span class="username username-hide-mobile" id="userName" style="color: rgb(255, 251, 240);">
+                      </span>
+                      <span style="color: rgb(255, 251, 240);">财务</span>
+                      <!-- 修改个人信息是否应该放置在这里 -->
+                      <!-- <span class="username username-hide-mobile">
+	                      <a href="#" onclick="updatePassword()" >
+	                      		 <span style="color: rgb(255, 251, 240);">修改密码</span> 
+	                      </a>
+                      </span> -->
+                      <span class="username username-hide-mobile">
+	                      &nbsp;&nbsp;&nbsp;
+                      </span>
+                      <span class="username username-hide-mobile">
+	                      <a href="#" onclick="delcokie('${request.getContextPath()}/user/loginOut.do');" >
+	                      		 <span style="font-size:18px;color: rgb(255, 251, 240);">退出</span> 
+	                      </a>
+                      </span>
+                      <span class="username username-hide-mobile">
+	                      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                      </span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<script>
+	//切换菜单
+	function delcokie(url){
+		delCookie("parentMenu");
+		delCookie("childMenu"); 
+		/* delCookie("parentMenuList");
+		delCookie("userInfo") */
+		window.location.href=url;
+	}
+	
+	//回首页
+	function loginSucc(){
+		delCookie("parentMenu");
+		delCookie("childMenu"); 
+		window.location.href="${request.getContextPath()}/user/loginSucc.do";
+	}
+	
+	/* function updatePassword(){
+		var = '${request.getContextPath()}/sysManager/updateAccountByDiallog.do';
+		CommonUtils.editModal(url, '600');
+	} */
+</script>

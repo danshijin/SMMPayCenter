@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>交易付款审核</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="" name="description">
+<meta content="" name="author">
+<link href="${request.getContextPath()}/Public/assets/admin/css/css.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/simple-line-icons/simple-line-icons.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/uniform/css/uniform.default.css"
+	rel="stylesheet" type="text/css">
+
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/components-rounded.css"
+	id="style_components" rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/plugins.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/layout.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/themes/default.css"
+	rel="stylesheet" type="text/css" id="style_color">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/custom.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css"
+	rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css"
+	href="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.css" />
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/common.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/kkpager.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.css"
+	rel="stylesheet" type="text/css" />
+<link rel="shortcut icon"
+	href="${request.getContextPath()}/Public/favicon.ico">
+	
+	<!-- pandora-dialog 弹层组件样式 -->
+<link
+	href="${request.getContextPath()}/Public/js/pandora/css/dialog.css"
+	rel="stylesheet" type="text/css">
+	
+	<!-- 状态图样式 -->
+<!-- <link
+	href="${request.getContextPath()}/Public/css/payment.css"
+	rel="stylesheet" type="text/css"> -->
+
+<!-- select2控件样式 -->
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.css"
+	rel="stylesheet" type="text/css">
+	<!-- loading 样式 -->
+<link href="${request.getContextPath()}/Public/css/loading.css"  rel="stylesheet" type="text/css">
+<script>
+	BASE_URL = '${request.getContextPath()}'
+</script>
+<style type="text/css">
+
+.datepicker {
+	font-size: 16px;
+}
+
+.datepicker td, .datepicker th {
+	width: 14.28571428571429%;
+	height: 40px;
+}
+
+.table-condensed {
+	width: 100%;
+}
+
+.datepicker-inline {
+	width: 100%;
+}
+
+.col-md-4, .col-md-6, .col-md-7, .col-md-12 {
+	padding-right: 0px;
+	padding-left: 0px;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th,
+	.table>thead>tr>td, .table>thead>tr>th {
+	border-bottom: 1px solid #ddd;
+}
+
+
+img{border:none;padding:0;margin:0;} 
+
+
+.payProcess{
+	border-collapse:collapse;
+}    
+.payProcess tr td{
+	border: 0;
+	padding: 0;
+	margin: 0;
+}
+
+
+
+<!--复写样式-->
+table{border-collapse:collapse}
+ul{list-style-type:none}
+.right{float:right}
+
+.font13, .nav ul li a{font-size:13px}
+.left, .nav ul li, .ct_p_05, .step li{float:left}
+.pay-step{background:url("${request.getContextPath()}/Public/images/step2.png") no-repeat right top; width:640px; height:22px}
+.pay-step3{background-position:0px -50px}
+.pay-step-li li{float:left; text-align:center; width:130px; line-height:18px; margin:10px 120px 0px 0px;}
+
+</style>
+
+</head>
+<body class="page-header-top-fixed page-footer-fixed">
+	<!--头部信息结束 -->
+	<div class="page-header">
+		<!--头部开始-->
+		<#include "/include/top.html" />
+		<!-- 头部信息结束 -->
+	</div>
+
+	<!-- BEGIN PAGE CONTAINER -->
+	<div class="page-container">
+		<#include "/include/menu.html" />
+		<div class="page-content-wrapper">
+			<div class="page-content">
+				<div class="container-fluid">
+					<div id="loading" style="display: none;" class="loading" align="center">
+						<br /> <br /> <br /> <br /> <img class="loadingimg"
+							src="${request.getContextPath()}/Public/images/loading.gif" />
+					</div>
+					<table class="table table-striped table-bordered table-hover ttTbl">
+						<tr>
+							<td width="30%">订单编号:&nbsp;&nbsp;&nbsp;${td.mallOrderId}</td>
+							<td width="40%">商城审核状态:&nbsp;&nbsp;&nbsp;
+							<#if td.mallAuditStatus??&&td.mallAuditStatus==1>
+							已通过
+							<#elseif td.mallAuditStatus??&&td.mallAuditStatus==2>
+							<font color="red">已拒绝</font>
+							&nbsp;&nbsp;&nbsp;
+							拒绝理由：${td.mallAuditReason}
+							<#elseif td.mallAuditStatus??&&td.mallAuditStatus==0>
+							待审核
+							</#if>
+							
+							</td>
+							<td align="right" width="30%">付款申请时间:&nbsp;&nbsp;&nbsp;${td.createTime}</td>
+						</tr>
+						<tr>
+							<td>
+									卖方企业:&nbsp;&nbsp;&nbsp;${td.sellerCompanyName} <br>
+									卖方账号:&nbsp;&nbsp;&nbsp;${td.sellUserAccountNo}<br>
+									买方企业:&nbsp;&nbsp;&nbsp;${td.buyerCompanyName}<br>
+									买方账号:&nbsp;&nbsp;&nbsp;${td.buyUserAccountNo}<br>
+									商品名称:&nbsp;&nbsp;&nbsp;${td.productName}<br>
+									商品详情:&nbsp;&nbsp;&nbsp;${td.productDetail}<br>
+									商品数量:&nbsp;&nbsp;&nbsp;${td.productNum?string('#.####')}${td.productNumUnit}<br>
+									交易金额:&nbsp;&nbsp;&nbsp;￥${td.dealMoney}元<br>
+									采购时间:&nbsp;&nbsp;&nbsp;${td.orderCreateTime}<br>
+									收交方式:&nbsp;&nbsp;&nbsp;${td.settlementType}<br>
+									交易类型:&nbsp;&nbsp;&nbsp;${td.dealType}<br>
+									发票说明:&nbsp;&nbsp;&nbsp;${td.invoice}<br>
+									交易编号:&nbsp;&nbsp;&nbsp;<b>${td.paymentNo}</b><br>
+									发货状态:&nbsp;&nbsp;&nbsp;
+									<#if td.respositoryStatus ?? && td.respositoryStatus==1>
+										仓库未监管
+									<#elseif td.respositoryStatus ?? && td.respositoryStatus==2>
+										仓库已确认
+									<#elseif td.respositoryStatus ?? && td.respositoryStatus==3>
+										未过户
+									</#if><br>
+									业务审核员:&nbsp;&nbsp;&nbsp;${td.businessAduitUser}<br>
+							</td>
+							<td colspan="2" >
+								<table style="width: 100%">
+									<tr>
+										<td>
+											<div class="right">
+					                      		<p class="pay-step pay-step3"></p>
+				                                <!---------------- 另两个状态 class="pay-step pay-step2" class="pay-step pay-step3----------------->
+				                                <ul class="pay-step-li font13">
+						                      		<li>待付款<br><span class="gray">${td.createTime}</span></li>
+				                                    <li>已冻结<br><span class="gray">${td.freezeTime}</span></li>
+				                                    <li style="margin-right:0px">已付款<br><span class="gray"  style="white-space:nowrap;">${td.doneTime}</span></li>
+				                                </ul>
+			                            	</div>
+										</td>
+									</tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr><td>&nbsp;</td></tr>
+									<tr align="right">
+										<td>
+											￥<span style="font-size: 25px;color: red">
+											<#if td.dealMoney??>
+												${td.dealMoney?string(',###.##')}
+											<#else>
+												0.00
+											</#if>
+											</span>元
+										</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3">
+								付款方式:&nbsp;&nbsp;&nbsp;${td.paymentType}<br>
+								付款时间:&nbsp;&nbsp;&nbsp;${td.freezeTime}<br>
+								资金流水号:&nbsp;&nbsp;&nbsp;${td.paymentNo}<br>
+							</td>
+						</tr>
+					</table>
+					<center>
+					<#if td.auditStatus??&&td.auditStatus==0>
+						<#if td.mallAuditStatus??&&td.mallAuditStatus==1>
+							<input style="width: 8%;height: 40px;" onclick="payment('${td.confirmId}','${td.paymentId}','${td.buyerCompanyName}','${td.dealMoney}')" type="button" value="解冻支付">
+							<#elseif td.mallAuditStatus??&&td.mallAuditStatus==2>
+							<input style="width: 8%;height: 40px;" onclick="forzen('${td.confirmId}','${td.paymentId}','${td.buyerCompanyName}','${td.dealMoney}')" type="button" value="资金解冻">
+						</#if>
+					</#if>
+					&nbsp;&nbsp;&nbsp;<input style="width: 8%;height: 40px;"  type="button" onclick="javascript :history.back(-1);" value="返回">
+					</center>	
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
+	<!-- 底部开始 -->
+	<#include "/include/foot.html" />
+	<!-- 底部结束 -->
+</body>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-migrate.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-ui/jquery-ui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/js/bootstrap.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.blockui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.cokie.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/uniform/jquery.uniform.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.js"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.sparkline.min.js"
+	type="text/javascript"></script>
+
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker-index.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/scripts/metronic.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/layout.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/commonUtils.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/highcharts.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/kkpager.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/My97DatePicker/WdatePicker.js"></script>
+<script src="${request.getContextPath()}/Public/js/moment/moment.js"
+	type="text/javascript"></script>
+
+
+<!-- select2控件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2_locale_zh-CN.js"></script>
+	
+	<!-- pandora-dialog 弹层组件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/pandora/pandora-dialog.js"></script>
+
+<!-- 脚本代码 -->
+<script type="text/javascript">
+
+	//解冻支付
+	function payment(confirmid,paymentid,companyName,price) {
+	 	$.confirm("是否确认解冻并支付该笔订单?", function () {
+			document.getElementById("loading").style.display ="block";
+	    	var resultCode; 
+			$.ajax({
+				url : "${request.getContextPath()}/transactionPayment/thaw.do",
+				type : "post",
+				dataType:'JSON',
+				data:{"confirmid":confirmid,"paymentid":paymentid,"companyName":companyName,"price":price},
+				success : function(result) {
+					document.getElementById("loading").style.display ="none";
+					//confirmAndRefresh(result);
+					if (result.result == "success") {
+						alert(result.message);
+						window.location.href="${request.getContextPath()}/transactionPayment/list.do?";	
+					}else{
+						alert(result.message);
+						window.location.href="${request.getContextPath()}/transactionPayment/list.do?";	
+					}
+				}
+			});
+		});
+		return false;
+	}
+	
+	//资金解冻
+	function forzen(confirmid,paymentid,companyName,price) {
+	 	$.confirm("是否确认解冻买方冻结的资金?", function () {
+			document.getElementById("loading").style.display ="block";
+	    	var resultCode; 
+			$.ajax({
+				url : "${request.getContextPath()}/transactionPayment/moneythaw.do",
+				type : "post",
+				dataType:'JSON',
+				data:{"confirmid":confirmid,"paymentid":paymentid,"companyName":companyName,"price":price},
+				success : function(result) {
+					document.getElementById("loading").style.display ="none";
+					if (result.result == "success") {
+						alert(result.message);
+						window.location.href="${request.getContextPath()}/transactionPayment/list.do?";	
+					}else{
+						alert(result.message);
+						window.location.href="${request.getContextPath()}/transactionPayment/list.do?";	
+					}
+				}
+			});
+		});
+		return false;
+	}
+	
+	function confirmAndRefresh(result){
+		if (result.code == "success") {
+				//重新加载
+				window.location.reload();
+		}else {
+			pandora.dialog({wrapClass: "dialog-mini", content:result.message, okValue:"确定",ok:function(){
+				//$.alert(result.message);
+				//重新加载
+				window.location.reload();
+			}});
+		}
+	}
+
+	function accountDetail(paymentid){
+		alert(paymentid);
+		window.location.href="${request.getContextPath()}/transferAccount/transferDetail.do?paymentid="+paymentid;	
+	}
+
+
+	$(function() {
+		Metronic.init(); // init metronic core componets
+		Layout.init(); // init layout
+		
+		//搜索下拉框
+		//toSelect2();
+		
+		//初始化分页插件	
+		toPage();
+	});
+
+	//分页
+	function toPage(){
+		function getParameter(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null)
+				return unescape(r[2]);
+			return null;
+		}
+		
+		var totalPage = $('#totalPage').val();
+		var totalRecords = $('#totalRecords').val();
+	
+		var pageNo = getParameter('pno');
+		if (!pageNo) {
+			pageNo = 1;
+		}
+		
+		//生成分页
+		//有些参数是可选的，比如lang，若不传有默认值
+		kkpager.generPageHtml({
+			pno : pageNo,
+			//总页码
+			total : totalPage,
+			//总数据条数
+			totalRecords : totalRecords,
+	
+			getLink : function(n) {
+				return this.hrefFormer + this.hrefLatter + "?pno=" + n+"&depotno="+$("#depotno").val()+"&ownerName="+$("#ownerName").val()+
+						"&satstatus="+$("#satstatus").val()+"&startTime="+$("#startTime").val()+"&endTime="+$("#endTime").val()+"&warehouse="+$("#warehouse").val()+"&watstatus="+$("#watstatus").val();
+			}
+		});
+	}
+
+</script>
+</html>

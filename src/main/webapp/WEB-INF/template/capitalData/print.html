@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>会员账户情况</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="" name="description">
+<meta content="" name="author">
+
+<style type="text/css">
+body {
+    color: rgba(51, 51, 51, 1);
+    font-family: "微软雅黑", "Open Sans", sans-serif;
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size: 12px;
+    direction: ltr;
+}
+thead tr td{
+
+    font-size: 8px;
+    text-align: center;  
+
+}
+</style>
+
+</head>
+<body onLoad="window.print()">
+			
+									<table>
+									<thead>
+									<tr>
+									
+										<th>
+											日期
+										</th>
+										<th>
+											 企业名称
+										</th>
+										<th>
+											对方企业
+										</th>
+										<th>
+											交易金额
+										</th>
+										<th>
+											冻结金额
+										</th>
+										<th>
+											可用帐户余额
+										</th>
+										<th>
+											帐户总余额
+										</th>
+									</tr>
+									</thead>
+										<tbody>
+											${tbodyList}
+										</tbody>
+									</table>
+</body>
+</html>

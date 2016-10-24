@@ -1,0 +1,93 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.CheckRepeatDao">
+
+	<!-- 检查会员审核操作是否重复 -->
+	<select id="checkUserAccount" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM user_pay_channel WHERE
+		user_id=#{userId} AND
+		pay_channel_id='10001' AND
+		user_account_status =0
+	</select>
+	<!-- 出金审核验证是否重复 -->
+	<select id="checkCashApply" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM tr_cash_apply_record WHERE
+		cash_apply_id=#{cashApplyId}
+		AND apply_status IN(0,1);
+	</select>
+	<select id="queryCashDetailCount" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+	SELECT  COUNT(*) FROM   tr_cash_apply_record WHERE  user_id=#{value} AND   apply_status in (0,1)	
+	</select>
+	<select id="checkUnfreezeRecore" parameterType="java.lang.Integer"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM tr_unfreeze_record WHERE freeze_id = (
+		SELECT freeze_id
+		FROM tr_freeze_record WHERE payment_id=#{paymentId}
+		AND
+		freeze_status=1
+		) AND unfreeze_status IN (0,1)
+	</select>
+	<select id="checkFreezeRecord" parameterType="java.lang.Integer"
+		resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM tr_freeze_record WHERE
+		payment_id=#{paymentId} AND
+		freeze_status IN (0,1)
+	</select>
+	<!-- 检查手动退款是否重复 -->
+	<select id="checkTransferRecord" parameterType="java.util.Map"
+		resultType="java.lang.Integer">
+
+		SELECT COUNT(*) FROM tr_transfer_record WHERE
+		payment_id=#{paymentId} AND
+		STATUS IN (0,1)
+
+	</select>
+
+	<select id="queryFreezeRecord" parameterType="java.lang.Integer"
+		resultType="com.smm.payCenter.domain.TrFreezeRecordEntity">
+		SELECT payment_id as paymentId ,freeze_money
+		freezeMoney,freeze_client_id
+		freezeClientId,apply_time applyTime,
+		freeze_status as freezeStatus,
+		verify_code verifyCode FROM tr_freeze_record
+		WHERE freeze_status = 1 and payment_id=#{value}
+	</select>
+	<select id="queryDetailById" parameterType="java.lang.Integer"
+		resultType="com.smm.payCenter.domain.TransactionDetail">
+		SELECT
+		r.payment_id AS paymentId,
+		r.payment_no AS paymentNo,
+		r.mall_order_id AS mallOrderId,
+		r.create_time AS createTime,
+		r.seller_company_name AS sellerCompanyName,
+		seller_mall_user_name as sellerMallUserName,
+		r.buyer_company_name AS buyerCompanyName,
+		buyer_mall_user_name As buyerMallUserName,
+		r.product_name AS productName,
+		r.product_detail AS productDetail,
+		r.product_num AS productNum,
+		r.product_num_unit AS productNumUnit,
+		r.deal_money AS dealMoney,
+		r.order_create_time orderCreateTime,
+		r.settlement_type AS settlementType,
+		r.deal_type AS dealType,
+		r.invoice,
+		r.payment_type AS paymentType,
+		r.freeze_time AS freezeTime,
+		r.payment_code AS paymentCode,
+		r.payment_status AS paymentStatus,
+		r.done_time AS doneTime,
+		r.verify_code AS verifyCode,
+		r.buyer_user_id AS buyerUserId,
+		r.seller_user_id AS sellerUserId,
+		payment_status AS paymentStatus
+		FROM tr_payment_record r
+
+		WHERE payment_id=#{value}
+	</select>
+
+
+
+</mapper>

@@ -1,0 +1,194 @@
+<!-- 模态窗口编辑模板 -->
+<form action="" id="myform" class="form-horizontal form-bordered" novalidate="novalidate" method="post">
+<!-- 窗口标题开始 -->
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+	<h2 class="modal-title">平台出金
+	</h2>
+</div>
+<!-- 窗口标题结束-->
+<!-- 内容开始 -->
+<form role="form" class="form-horizontal" id="myFormItems" name="myFormItems">
+<div class="modal-body">
+	<div class="portlet-body form">
+		<div class="form-body">
+			<div class="form-group" id="ykDiv">
+				<label class="col-md-3 control-label" for="title">选择银行账户:</label>	
+			    <div class="col-md-5">
+					<select class="form-control input-medium" id="bindId">
+					<#list ulist as UserAccountBanEntity>
+						<option <#if UserAccountBanEntity.bankAccountNo??>value="${UserAccountBanEntity.bindId}"</#if>>
+							<#if UserAccountBanEntity.bankName?? && UserAccountBanEntity.bankAccountNo?? >
+								${UserAccountBanEntity.bankName}&nbsp;&nbsp;${UserAccountBanEntity.bankAccountNo}
+							<#else>
+							</#if>
+						</option>
+					</#list>	
+					</select>
+				</div>
+			</div>
+			<input type="hidden" id="userId1" value="${userId}">
+			<input type="hidden" id="useMoney1" value="${user.useMoney}">
+			<input type="hidden" id="userCompanyName" value="${userCompanyName}">
+			<div class="form-group" id="tikDiv">
+				<label class="col-md-3 control-label" for="title">提款金额:</label>
+				<div class="col-md-3">
+					<input class="form-control" id="drawMoney" type="text" placeholder="提款金额"
+						onblur="fursDiv();" onkeyup='checkDecimal(this)'>
+				</div><label class="col-md-1 control-label" for="title">元</label>
+				<label class="col-md-3 control-label" for="title" ><font color="gray">手续费约：<a href="#" style="text-decoration: none;" id="smoney">0.00</a>元</font></label>
+			</div>
+			
+			<div class="form-group" id="warnDiv" style="display: none;">
+			    <h4 id="money" style="text-align: center;">
+				</h4>
+			</div>
+			<div class="form-group" id="warrit" style="display: none;">
+			    <h4  style="text-align: center;color: red;">
+			    	账户余额不足！
+				</h4>
+			</div>
+	</div>
+</div>
+</form>
+
+<p id="butDiv1">
+<#if (ulist?size > 0)>
+<button type="button" class="btn red" onclick="openSubmit();" style="margin-left: 40%;">确认</button>
+<#else>
+<button type="button" class="btn red" disabled="disabled" style="margin-left: 40%;">确认</button>
+</#if>
+  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+</p>
+<p id="butDiv2" style="display: none;">
+  <button type="button" class="btn red" onclick="submitForm();" style="margin-left: 40%;" id="sub1">确认</button>
+  <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+</p>
+<!-- 结束 -->
+</form>
+<!-- 业务处理开始 -->
+<script>
+
+var record = {
+	num : ""
+}
+var checkDecimal = function(n) {
+	$('#showLog').hide();
+	var decimalReg = /^\d{0,8}\.{0,1}(\d{1,4})?$/;//var decimalReg=/^[-\+]?\d{0,8}\.{0,1}(\d{1,2})?$/; 
+	if (n.value != "" && decimalReg.test(n.value)) {
+		record.num = n.value;
+	} else {
+		if (n.value != "") {
+			n.value = record.num;
+		}
+	}
+}
+
+
+
+function fursDiv(){
+	var bindId=$('#bindId').val();
+	if(bindId!=null && bindId!=''){
+		$.ajax({
+			type: "POST",
+			url: BASE_URL+"/UserAccount/iszxBank.do",
+			data:{"bindId":bindId},
+			dataType: "json",
+			success: function(res){
+				if(res.msg=="1"){ 
+					var drawMoney=$('#drawMoney').val().trim();
+					var smoneyVal=getPoundage(drawMoney);
+					$('#smoney').text(smoneyVal);
+				}
+			}
+		});
+	}
+}
+/*
+ * 计算手续费：
+ * 1万元（含）以下	 5.5元
+ * 1-10万（含） 	 10.50元
+ * 10-50万（含） 	 15.50元
+ * 50-100万（含） 	 20.50元
+ * 100万以上		 0.02‰+0.5（最多200.5元）
+ */
+ function getPoundage(money){
+	if(money !=null && money!=''){
+		if(Number(money)<=10000 && Number(money)>0){
+			return '5.5';
+		}
+		if(Number(money)>10000 && Number(money)<=100000){
+			return '10.5';
+		}
+		if(Number(money)>100000 && Number(money)<=500000){
+			return '15.5';
+		}
+		if(Number(money)>=500000 && Number(money)<=1000000){
+			return '20.5';
+		}
+		if(Number(money)>1000000){
+			var num=(Number(money)*0.02)/1000+0.5;
+			if(Number(num)>200.5){
+				return '200.5';
+			}else{
+				return num.toFixed(2);
+			}
+		}
+	}else{
+		return '0.00';
+	}
+}
+
+function openSubmit(){
+	var userId=$('#userId1').val();
+	var bindId=$('#bindId').val();
+	var drawMoney=$('#drawMoney').val().trim();
+	if(drawMoney==null || drawMoney==''){
+		CommonUtils.succModal('系统提示','请输入提款金额');
+		return;
+	}
+	var useMoney1=$('#useMoney1').val();//账户可用余额
+	var smoney=$('#smoney').text();//手续费
+	var jmoney=parseFloat(drawMoney)+parseFloat(smoney);//手续费+转出金额
+	if(Number(jmoney)>Number(useMoney1)){ //手续费+转出金额大于可用余额
+		$('#warrit').show();
+		return;
+	}
+	$('#ykDiv').hide();
+	$('#tikDiv').hide();
+	$('#butDiv1').hide();
+	$('#warnDiv').show();
+	var moneyText="确认出金后，系统将直接将款项打到用户实体帐户上确认出金（￥"+drawMoney+"）吗？";
+	$('#money').text(moneyText);
+	$('#butDiv2').show();
+}
+function submitForm(){
+	$('#sub1').attr('disabled',true); 
+	$('#sub1').text("提交中");
+	var userId=$('#userId1').val();
+	var bindId=$('#bindId').val();
+	var drawMoney=$('#drawMoney').val().trim();
+	var smoney=$('#smoney').text();//手续费
+	var userCompanyName=$('#userCompanyName').val();//公司名
+	
+	//后台提交
+	$.ajax({
+    		type: "POST",
+    		url: BASE_URL+"/UserAccount/addDebitsDetil.do",
+    		data:{"userId":userId,"bindId":bindId,"drawMoney":drawMoney,"smoney":smoney,"userCompanyName":userCompanyName},
+    		dataType: "json",
+    		success: function(res){
+    			if(res.code=="succ"){ 
+    				$(".editModal").modal('hide');
+    				$(".editModal").empty();
+    				CommonUtils.succModal2('系统提示','处理成功',BASE_URL+'/UserAccount/goSelPage.do');
+    			}
+    			else {
+    				$(".editModal").modal('hide');
+    				$(".editModal").empty();
+    				CommonUtils.succModal('系统提示',res.msg);
+    			}
+    		}
+   });
+}
+</script>

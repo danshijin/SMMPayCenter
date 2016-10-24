@@ -1,0 +1,329 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.Account.AccountDao" >
+  <resultMap id="BaseResultMap" type="com.smm.payCenter.domain.UserAccount" >
+    <id column="user_id" jdbcType="INTEGER" property="userId" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="id_card_url" jdbcType="VARCHAR" property="idCardUrl" />
+    <result column="company_addr" jdbcType="VARCHAR" property="companyAddr" />
+    <result column="certificate_no" jdbcType="VARCHAR" property="certificateNo" />
+    <result column="certificate_url" jdbcType="VARCHAR" property="certificateUrl" />
+    <result column="registery_certificate_url" jdbcType="VARCHAR" property="registeryCertificateUrl" />
+    <result column="company_post_code" jdbcType="VARCHAR" property="companyPostCode" />
+    <result column="company_name" jdbcType="VARCHAR" property="companyName" />
+    <result column="phone" jdbcType="VARCHAR" property="phone" />
+    <result column="mobile_phone" jdbcType="VARCHAR" property="mobilePhone" />
+    <result column="contact_name" jdbcType="VARCHAR" property="contactName" />
+    <result column="mall_user_name" jdbcType="VARCHAR" property="mallUserName" />
+    <result column="audit_id" jdbcType="INTEGER" property="auditId" />
+    <result column="audit_time" jdbcType="VARCHAR" property="auditTime" />
+    <result column="audit_status" jdbcType="INTEGER" property="auditStatus" />
+    <result column="freeze_money" jdbcType="DECIMAL" property="freezeMoney" />
+    <result column="use_money" jdbcType="DECIMAL" property="useMoney" />
+    <result column="register_ip" jdbcType="VARCHAR" property="registerIp" />
+    <result column="register_time" jdbcType="VARCHAR" property="registerTime" />
+    <result column="last_login_ip" jdbcType="VARCHAR" property="lastLoginIp" />
+    <result column="last_login_time" jdbcType="VARCHAR" property="lastLoginTime" />
+  </resultMap>
+  <select id="menuData" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	
+  	SELECT a.* FROM fnl_role_relation  a
+
+	INNER JOIN  fnl_role b ON a.roleId = b.id 
+	
+	INNER JOIN fnl_account c ON c.roleId = b.id
+	
+	where a.id = #{accountId}
+  
+  </select>
+  
+  <select id="queryAccountData" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	
+  	SELECT a.*, b.bind_id as bindId ,b.bank_account_no as bankAccountNo ,b.bank_name as bankName ,b.draw_money as drawMoney,
+  	
+  	b.bind_time as bindTime,b.audit_status as auditBankStatus,b.create_time as createTime,b.is_payment as isPayment
+
+	FROM user_account a 
+	
+	INNER  JOIN user_bind_bank b ON b.user_id = a.user_id AND a.audit_status=1
+	
+	where 1 = 1 
+	
+	<if test=" userName != null and userName != ''">
+  		and a.user_name like  CONCAT('%',#{userName},'%')
+  	</if>
+  	
+  	<if test=" companyName != null and companyName != ''">
+  		and a.company_name like  CONCAT('%',#{companyName},'%')
+  	</if>
+  	
+  	<if test=" mobilePhone != null and mobilePhone != ''">
+  		and a.mobile_phone like  CONCAT('%',#{mobilePhone},'%')
+  	</if>
+  	
+  	<if test=" bankAccountNo != null and bankAccountNo != ''">
+  		and b.bank_account_no like  CONCAT('%',#{bankAccountNo},'%')
+  	</if>
+  	
+  	<if test=" startTime != null">
+  		and b.create_time &gt;= #{startTime}
+  	</if>
+  	
+  	<if test="endTime != null">
+  		and b.create_time &lt;= #{endTime}
+  	</if>
+  	
+  	<if test="auditStatus != null ">
+  		and b.audit_status = #{auditStatus}
+  	</if>
+  	<!-- <if test="auditStatus == null">
+  		and b.audit_status != 2
+  	</if> -->
+  	<if test="is_payment != null">
+  		and b.is_payment = #{is_payment}
+  	</if>
+	
+	ORDER BY createTime DESC
+	
+	<!-- 分页 -->
+	<if test="startNum!=null and endNum !=null ">
+		limit ${startNum},${endNum}
+	</if>
+	  	
+  </select>
+  
+  <select id="queryAccountDataCount" parameterType="java.util.Map" resultType="Integer">
+  	SELECT COUNT(1) from 
+
+	(
+	
+	SELECT a.*
+	
+	FROM user_account a 
+	
+	INNER  JOIN user_bind_bank b ON b.user_id = a.user_id AND a.audit_status=1
+	
+	where a.audit_status = 1 
+	
+	<if test=" userName != null and userName != ''">
+  		and a.user_name like  CONCAT('%',#{userName},'%')
+  	</if>
+  	
+  	<if test=" companyName != null and companyName != ''">
+  		and a.company_name like  CONCAT('%',#{companyName},'%')
+  	</if>
+  	
+  	<if test=" mobilePhone != null and mobilePhone != ''">
+  		and a.mobile_phone like  CONCAT('%',#{mobilePhone},'%')
+  	</if>
+  	
+  	<if test=" bankAccountNo != null and bankAccountNo != ''">
+  		and b.bank_account_no like  CONCAT('%',#{bankAccountNo},'%')
+  	</if>
+  	
+  	<if test=" startTime != null and startTime !='' ">
+  		and b.create_time &gt;= #{startTime}
+  	</if>
+  	
+  	<if test="endTime != null and endTime !=''">
+  		and b.create_time &lt;= #{endTime}
+  	</if>
+  	<if test="auditStatus != null">
+  		and b.audit_status = #{auditStatus}
+  	</if>
+  <!-- 	<if test="auditStatus == null">
+  		and b.audit_status !=  2
+  	</if> -->
+  	<if test="is_payment != null">
+  		and b.is_payment = #{is_payment}
+  	</if>
+  	
+  	ORDER BY b.create_time DESC
+	
+	) temp
+  </select>
+  
+  <update id="updateBankAuditStatus" parameterType="java.util.Map">
+  	
+  	update user_bind_bank 
+  	
+  	set bind_time = #{bindTime}
+  	
+  	<if test="auditStatus != null">
+  		,audit_status = #{auditStatus}
+  	</if>
+  	
+  	<if test="drawMoney != null">
+  		,draw_money = #{drawMoney}
+  	</if>
+  	
+  	<if test="is_payment != null">
+  		,is_payment = #{is_payment}
+  	</if>
+  	
+  	where bind_id = #{bindId}
+  
+  </update>
+  
+  <select id="querySysAccountCount" parameterType="java.util.Map" resultType="Integer">
+  	SELECT count(*) from 
+	(
+	
+		SELECT a.*,a.last_login_time as lastLoginTime,b.role_name as roleName,c.accountName as openAccoutName FROM fnl_account a
+		
+		INNER JOIN fnl_role b ON a.roleId = b.id 
+	
+		INNER JOIN fnl_account c ON c.id = a.updatedBy
+		
+		where 1 = 1
+		
+		<if test="account != null ">
+		
+			<!-- and a.id = #{accountId} -->
+			
+			and a.account like CONCAT('%',#{account},'%')
+  			
+  		</if>
+		
+		ORDER BY a.createdAt DESC
+	) temp
+	
+  </select>
+  
+  <select id="querySysAccountList" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.Account">
+  	
+  	SELECT a.*,a.last_login_time as lastLoginTime,b.role_name as roleName,c.accountName as openAccoutName FROM fnl_account a
+		
+	INNER JOIN fnl_role b ON a.roleId = b.id 
+
+	INNER JOIN fnl_account c ON c.id = a.updatedBy
+	
+	where 1 = 1
+		
+	<if test="account != null ">
+	
+		<!-- and a.id = #{accountId} -->
+			
+		and a.account like CONCAT('%',#{account},'%')
+ 			
+	</if>
+		
+	ORDER BY a.createdAt DESC
+	
+	<!-- 分页 -->
+	<if test="startNum!=null and endNum !=null ">
+		limit ${startNum},${endNum}
+	</if>
+		
+  </select>
+  
+  <update id="updateAccountStatus" parameterType="java.util.Map">
+  
+  	update fnl_account  
+  	
+  	set isEnabled = #{isenabled},updatedAt = #{updatedat},updatedBy = #{updatedBy}
+  	
+  	where id = #{accountId}
+  
+  </update>
+  
+  <!-- 增加管理员 -->
+  <insert id="addAccount" parameterType="java.util.Map">
+  	insert into fnl_account (isLocked, account, 
+      pwd, salt, roleId, 
+      createdAt, createdBy, updatedAt, 
+      updatedBy, isEnabled, accountName, 
+      last_login_time)
+    values (#{isLocked,jdbcType=INTEGER}, #{loginName,jdbcType=VARCHAR}, 
+      #{pwd,jdbcType=VARCHAR}, #{salt,jdbcType=VARCHAR}, #{roleId,jdbcType=INTEGER}, 
+      #{createdAt,jdbcType=VARCHAR}, #{createdBy,jdbcType=INTEGER}, #{updatedAt,jdbcType=VARCHAR}, 
+      #{updatedBy,jdbcType=INTEGER}, #{isEnabled,jdbcType=INTEGER}, #{accountName,jdbcType=VARCHAR}, 
+      #{lastLoginTime,jdbcType=VARCHAR})
+  
+  </insert>
+  
+     <!--  根据用户名和密码匹配登录  -->
+   <!-- <select id="userLogin" resultMap="BaseResultMap" parameterType="java.util.Map">
+       select * from fnl_account
+       	where account = #{account} and pwd=#{pwd}
+   </select> -->
+  
+  
+      <!--  根据用户名和密码匹配登录  -->
+    <select id="userLogin" resultType="com.smm.payCenter.domain.Account" parameterType="java.util.Map">
+        select 
+        
+        
+        
+                 id,
+
+         account,
+
+         pwd,
+
+         salt,
+
+         roleid,
+
+         createdat,
+
+         createdby,
+
+         updatedat,
+
+         updatedby,
+
+         isenabled,
+
+         islocked,
+         
+         accountName,
+
+         last_login_time  lastLoginTime
+        
+        
+        
+        from fnl_account
+        	where account = #{account} and pwd=#{pwd} and isEnabled = 0
+    </select>
+  
+        <!--  更新登陆时间  -->
+    <update id="updateLastLoginTime" parameterType="java.util.Map">
+      update fnl_account set
+	
+	  last_login_time = #{lastLoginTime} where  id=#{id}
+	  
+    </update>
+  
+  <select id="queryUserAccountList" parameterType="java.util.Map" resultMap="BaseResultMap">
+  
+  	SELECT * FROM 
+  	
+  	user_account where company_name like CONCAT('%',#{companyName},'%')
+  	
+  </select>
+  <!-- 修改管理员密码 -->
+  <update id="updateAccountPassword" parameterType="java.util.Map" useGeneratedKeys="true" keyProperty="id">
+  	
+  	update fnl_account set pwd = #{pwd}
+  	
+  	where id = #{accountId}
+  	
+  </update>
+  
+  <select id="queryUserAccountByUserId" parameterType="java.util.Map" resultMap="BaseResultMap">
+  	select * from  user_account where user_id = #{userId}
+  </select>
+  
+  <select id="queryFnlAccount" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.Account">
+  	select * from  fnl_account where  account = #{loginName}
+  </select>
+  <!-- 通过用户ID查询银行卡信息 -->
+  <select id="queryUserBindBnak" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.UserAccountBanEntity">
+  	SELECT ub.bind_id AS bindId,ub.user_id AS userId,ub.bank_id AS bankId,ub.bank_name AS bankName,ub.draw_money AS drawMoney,
+		ub.bank_type_id AS bankTypeId,ub.bank_type AS banktype,ub.bank_account_no AS bankAccountNo,ub.cnaps AS cnaps,
+		ub.is_payment AS isPayment,ub.audit_status AS auditStatus
+		 FROM user_bind_bank ub WHERE user_id = #{userid} and ub.audit_status != 2 
+  </select>
+</mapper>

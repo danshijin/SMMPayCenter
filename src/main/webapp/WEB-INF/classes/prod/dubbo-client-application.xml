@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>  
+<beans xmlns="http://www.springframework.org/schema/beans"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"  
+    xsi:schemaLocation="http://www.springframework.org/schema/beans  
+        http://www.springframework.org/schema/beans/spring-beans.xsd  
+        http://code.alibabatech.com/schema/dubbo  
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd  
+        ">  
+  
+    <!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->  
+    <dubbo:application name="hehe_consumer" />  
+  
+    <!-- 使用zookeeper注册中心暴露服务地址 -->  
+    <!-- <dubbo:registry address="multicast://224.5.6.7:1234" /> -->  
+    <!-- <dubbo:registry address="zookeeper://172.16.20.153:2119" />  --> 
+  
+    <!-- 生成远程服务代理 -->  
+    <dubbo:reference id="authorService"  
+        interface="com.smmpay.inter.AuthorService" url="dubbo://172.16.20.153:20880/com.smmpay.inter.AuthorService"/> 
+    
+    <!-- 签约开户 -->  
+    <dubbo:reference id="openAccountService"  
+        interface="com.smmpay.inter.smmpay.OpenAccountService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.OpenAccountService"/> 
+    <!-- 查询余额-->  
+    <dubbo:reference id="queryAccountBalanceService"  
+        interface="com.smmpay.inter.smmpay.QueryAccountBalanceService" timeout="9000000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.QueryAccountBalanceService"/> 
+    <!-- 查询交易记录 -->  
+    <dubbo:reference id="queryTrRecordsService"  
+        interface="com.smmpay.inter.smmpay.QueryTrRecordsService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.QueryTrRecordsService"/> 
+        
+    <!-- 每日结算 -->  
+    <dubbo:reference id="callEveryDaySettlementService"
+        interface="com.smmpay.inter.smmpay.CallEveryDaySettlementService" timeout="9000000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.CallEveryDaySettlementService"/> 
+    <!--（自动、手动） 解冻支付 -->  
+    <dubbo:reference id="callThawPayService"  
+        interface="com.smmpay.inter.smmpay.CallThawPayService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.CallThawPayService"/> 
+    <!-- 手动冻结 -->
+    <dubbo:reference id="callManualFreezeService"
+        interface="com.smmpay.inter.smmpay.CallManualFreezeService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.CallManualFreezeService"/> 
+    <!-- 手动解冻 -->
+    <dubbo:reference id="callManualUNFreezeService"
+        interface="com.smmpay.inter.smmpay.CallManualUNFreezeService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.CallManualUNFreezeService"/> 
+    <!-- 非登录明细打印 -->
+    <dubbo:reference id="noLoginPrintService"
+        interface="com.smmpay.inter.smmpay.NoLoginPrintService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.NoLoginPrintService"/> 
+    <!-- 平台出金-->
+    <dubbo:reference id="platformDebitsService"
+        interface="com.smmpay.inter.smmpay.PlatformDebitsService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.PlatformDebitsService"/>
+    <!-- 在线销户-->
+    <dubbo:reference id="cancelAccountService"
+        interface="com.smmpay.inter.smmpay.CancelAccountService" timeout="200000" check="false" url="dubbo://172.16.20.153:20880/com.smmpay.inter.smmpay.CancelAccountService"/>  
+        
+</beans> 

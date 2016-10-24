@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta lang="en" charset="UTF-8">
+<title>角色管理</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<link href="${request.getContextPath()}/Public/assets/admin/css/css.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/font-awesome/css/font-awesome.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/simple-line-icons/simple-line-icons.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/css/bootstrap.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/uniform/css/uniform.default.css"
+	rel="stylesheet" type="text/css">
+
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/components-rounded.css"
+	id="style_components" rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/plugins.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/layout.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/themes/default.css"
+	rel="stylesheet" type="text/css" id="style_color">
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/custom.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css"
+	rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css"
+	href="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.css" />
+<link
+	href="${request.getContextPath()}/Public/assets/admin/css/common.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/assets/global/css/kkpager.css"
+	rel="stylesheet" type="text/css">
+<link rel="shortcut icon"
+	href="${request.getContextPath()}/Public/favicon.ico">
+
+<!-- 时间插件 -->
+<link
+	href="${request.getContextPath()}/Public/js/jqueryUI/css/jquery-ui.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/js/jqueryUI/css/jquery-ui-timepicker-addon.min.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/js/jqueryUI/css/jquery.datetimepicker.css"
+	rel="stylesheet" type="text/css">
+
+<!-- select2控件样式 -->
+<link
+	href="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.css"
+	rel="stylesheet" type="text/css">
+
+<!-- layer web弹层组件样式 -->
+<link href="${request.getContextPath()}/Public/js/layer/skin/layer.css"
+	rel="stylesheet" type="text/css">
+
+<!-- pandora-dialog 弹层组件样式 -->
+<link
+	href="${request.getContextPath()}/Public/js/pandora/css/dialog.css"
+	rel="stylesheet" type="text/css">
+	
+	
+<script>
+	BASE_URL = '${request.getContextPath()}'
+</script>
+<style type="text/css">
+.nav>li>a {
+	text-shadow: none;
+	color: red;
+	font-size: 22px;
+}
+
+.datepicker {
+	font-size: 16px;
+}
+
+.datepicker td, .datepicker th {
+	width: 14.28571428571429%;
+	height: 40px;
+}
+
+.table-condensed {
+	width: 100%;
+}
+
+.datepicker-inline {
+	width: 100%;
+}
+
+.col-md-4, .col-md-6, .col-md-7, .col-md-12 {
+	padding-right: 0px;
+	padding-left: 0px;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th,
+	.table>thead>tr>td, .table>thead>tr>th {
+	border-bottom: 1px solid #ddd;
+}
+
+.input-inline {
+	display: inline-block;
+	width: 315px;
+	vertical-align: middle;
+}
+
+.dialog-confirm {
+	padding: 20px;
+	font-size: 25px;
+	text-align: center;
+	color: rgb(253, 8, 8);
+}
+
+.dialog-footer {
+	text-align: center;
+}
+
+.dialog-body .dialog-content {
+	padding: 20px;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	color: rgb(253, 8, 8);
+	font-size: 25px;
+}
+
+.modal-footer {
+	padding: 15px;
+	text-align: center;
+}
+
+.green.btn {
+	color: #FFFFFF;
+	background-color: #cb5a5e;
+}
+</style>
+
+</head>
+<body class="page-header-top-fixed page-footer-fixed">
+	<!--头部信息结束 -->
+	<div class="page-header">
+		<!--头部开始-->
+		<#include "/include/top.html" />
+		<!-- 头部信息结束 -->
+	</div>
+
+	<!-- BEGIN PAGE CONTAINER -->
+	<div class="page-container">
+		<#include "/include/menu.html" />
+		<div class="page-content-wrapper">
+			<div class="page-content">
+				<div class="container-fluid">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="portlet light " style="margin-top: 5px;">
+								<div class="portlet-body">
+									<div class="row" style="height: 56px; text-align: left; padding-left: 3px;">
+										<div class="col-sm-12">
+											<div id="sample_2_filter" class="dataTables_filter">
+												<form action="${request.getContextPath()}/sysManager/roleList.do" method="post" id="myForm">
+													<label>角色名称:<input type="text" class="form-control input-small2  input-inline" placeholder="角色名称" name="roleNameParam" id="roleNameParam"
+														value="${roleNameParam!''}"></label>
+
+													<button class="btn red" type="submit">
+														<i class="fa fa-search"></i> 查询
+													</button>
+
+													<button class="btn red" type="button" style="float: right;"
+														id="new_btn">
+														<i class="fa fa-plus"></i> 新增角色
+													</button>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+								<table class="table table-striped table-bordered table-hover">
+									<thead>
+										<tr>
+											<th>角色ID</th>
+											<th>角色名称</th>
+											<th>角色描述</th>
+											<th>状态</th>
+											<th>开通时间</th>
+											<th>操作</th>
+										</tr>
+									</thead>
+									<tbody>
+										<#if roleList ??> 
+											<#list roleList as role>
+												 <tr>
+												 	<td>${role.id!'--'}</td>
+													<td>${role.roleName!'--'}</td>
+													<td>${role.description!'--'}</td>
+													<td>
+														<#if role.roleStatus == 1>
+															正常
+														</#if>
+														
+														<#if  role.roleStatus == 2>
+															关闭
+														</#if>
+													</td>
+													<td>${role.createTime!'--'}</td>
+													<td>
+														<a href="#" class="xiugai" href="javascript:void(0);" roleId="${role.id}" roleName="${role.roleName}">修改</a> 
+													</td>
+												</tr> 
+											</#list> 
+										</#if>
+									</tbody>
+								</table>
+								<div style="width: 80%; margin: 0 auto;">
+									<div id="kkpager">
+										<input type="hidden" value="${totalPage!}" id="totalPage">
+										<input type="hidden" value="${totalRecords!}" id="totalRecords">
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END PAGE CONTAINER -->
+	<!-- 底部开始 -->
+	<#include "/include/foot.html" />
+	<!-- 底部结束 -->
+</body>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-migrate.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-ui/jquery-ui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/js/bootstrap.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.blockui.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.cokie.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/uniform/jquery.uniform.min.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.js"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/jquery.sparkline.min.js"
+	type="text/javascript"></script>
+
+<!-- <script
+	src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker-index.js"
+	type="text/javascript"></script> -->
+<!-- 时间插件 -->
+<script
+	src="${request.getContextPath()}/Public/js/jqueryUI/jquery.ui.custom.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/js/jqueryUI/jquery.ui.datepicker.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/js/jqueryUI/jquery.ui.datepicker-zh-CN.js"
+	type="text/javascript"></script>
+
+
+<script
+	src="${request.getContextPath()}/Public/assets/global/scripts/metronic.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/layout.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/admin/scripts/commonUtils.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/highcharts.js"
+	type="text/javascript"></script>
+<script
+	src="${request.getContextPath()}/Public/assets/global/plugins/kkpager.min.js"
+	type="text/javascript"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/My97DatePicker/WdatePicker.js"></script>
+<script src="${request.getContextPath()}/Public/js/moment/moment.js"
+	type="text/javascript"></script>
+
+
+<!-- select2控件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/assets/global/plugins/select2/select2_locale_zh-CN.js"></script>
+
+<!-- layer web弹层组件-->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/layer/layer.min.js"></script>
+
+<!-- pandora-dialog 弹层组件 -->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/pandora/pandora-dialog.js"></script>
+
+	
+<!-- zTree 插件-->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.excheck-3.5.min.js"></script>
+
+<!-- 脚本代码 -->
+<script type="text/javascript">
+	$(function() {
+		Metronic.init(); // init metronic core componets
+		Layout.init(); // init layout
+
+		//td th 内容居中
+		$("th").css("text-align", "center");
+		$("td").css("text-align", "center");
+		
+		//初始化分页插件	
+		toPage();
+	});
+
+	//分页
+	function toPage() {
+		function getParameter(name) {
+			var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+			var r = window.location.search.substr(1).match(reg);
+			if (r != null)
+				return unescape(r[2]);
+			return null;
+		}
+
+		var totalPage = $('#totalPage').val();
+		var totalRecords = $('#totalRecords').val();
+
+		var pageNo = getParameter('pno');
+		if (!pageNo) {
+			pageNo = 1;
+		}
+
+		//生成分页
+		//有些参数是可选的，比如lang，若不传有默认值
+		kkpager.generPageHtml({
+			pno : pageNo,
+			//总页码
+			total : totalPage,
+			//总数据条数
+			totalRecords : totalRecords,
+
+			getLink : function(n) {
+				return this.hrefFormer + this.hrefLatter + "?pno=" + n
+						+ "&roleNameParam=" +encodeURI(encodeURI($("#roleNameParam").val()));
+			}
+		});
+	}
+
+
+	//新增管理员dialog
+	$("#new_btn").bind("click", function() {
+		var url = "${request.getContextPath()}/sysManager/addRole.do";
+		CommonUtils.editModal(url, '600');
+	});
+
+	
+	//修改管理员dialog
+	$("a.xiugai").bind("click", function() {
+		var roleId = $(this).attr("roleId");
+		var roleName = encodeURI(encodeURI( $(this).attr("roleName") ));
+		var url = "${request.getContextPath()}/sysManager/updaeRole.do?roleId="+roleId+"&roleName="+roleName;
+		CommonUtils.editModal(url, '600');
+	});
+	
+	function confirmAndRefresh(result) {
+		if (result.code == "success") {
+			//重新加载
+			window.location.reload();
+		} else {
+			pandora.dialog({
+				wrapClass : "dialog-mini",
+				content : result.message,
+				okValue : "确定",
+				ok : function() {
+					//$.alert(result.message);
+					//重新加载
+					window.location.href = "${request.getContextPath()}/sysManager/roleList.do";
+				}
+			});
+		}
+	}
+</script>
+</html>

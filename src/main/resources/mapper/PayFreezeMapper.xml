@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smm.payCenter.dao.PayFreezeDAO">
+
+	<resultMap id="paymentRecordResultMap" type="com.smm.payCenter.domain.PaymentRecord" >
+	    <id column="payment_id" property="paymentid" jdbcType="INTEGER" />
+	    <result column="deal_money" property="dealmoney" jdbcType="DOUBLE" />
+	    <result column="deal_type" property="dealtype" jdbcType="VARCHAR" />
+	    <result column="buyer_company_name" property="buyercompanyname" jdbcType="VARCHAR" />
+	    <result column="buyer_mall_user_name" property="buyermallusername" jdbcType="VARCHAR" />
+	    <result column="buyer_pay_channel_id" property="buyerpaychannelid" jdbcType="INTEGER" />
+	    <result column="buyer_user_id" property="buyeruserid" jdbcType="VARCHAR" />
+	    <result column="seller_company_name" property="sellercompanyname" jdbcType="VARCHAR" />
+	    <result column="seller_mall_user_name" property="sellermallusername" jdbcType="VARCHAR" />
+	    <result column="seller_pay_channel_id" property="sellerpaychannelid" jdbcType="INTEGER" />
+	    <result column="seller_user_id" property="selleruserid" jdbcType="VARCHAR" />
+	    <result column="mall_order_id" property="mallorderid" jdbcType="VARCHAR" />
+	    <result column="product_name" property="productname" jdbcType="VARCHAR" />
+	    <result column="product_num" property="productnum" jdbcType="FLOAT" />
+	    <result column="product_num_unit" property="productnumunit" jdbcType="VARCHAR" />
+	    <result column="product_detail" property="productdetail" jdbcType="VARCHAR" />
+	    <result column="payment_code" property="paymentcode" jdbcType="VARCHAR" />
+	    <result column="pay_channel_id" property="paychannelid" jdbcType="INTEGER" />
+	    <result column="is_handler" property="ishandler" jdbcType="INTEGER" />
+	    <result column="freeze_time" property="freezetime" jdbcType="VARCHAR" />
+	    <result column="done_time" property="donetime" jdbcType="VARCHAR" />
+	    <result column="create_time" property="createtime" jdbcType="VARCHAR" />
+	    <result column="payment_time" property="paymenttime" jdbcType="VARCHAR" />
+	    <result column="invoice" property="invoice" jdbcType="VARCHAR" />
+	    <result column="payment_type" property="paymenttype" jdbcType="VARCHAR" />
+	    <result column="settlement_type" property="settlementtype" jdbcType="VARCHAR" />
+	    <result column="payment_status" property="paymentstatus" jdbcType="INTEGER" />
+	    <result column="order_create_time" property="ordercreatetime" jdbcType="VARCHAR" />
+	    
+	    <result column="payment_no" property="paymentNo" jdbcType="VARCHAR" />
+	    <result column="freeze_money" property="freezemoney" jdbcType="VARCHAR" />
+	    <result column="use_money" property="usemoney" jdbcType="VARCHAR" />
+	    <result column="desc" property="desc" jdbcType="VARCHAR" />
+	    <result column="freeze_note" property="freezeNote" jdbcType="VARCHAR" />
+	    <result column="audit_time" property="audittime" jdbcType="TIMESTAMP" />
+    </resultMap>
+
+    <!-- 冻结失败账单列表  -->
+    <select id="queryPayFreezeList" parameterType="java.util.Map" resultMap="paymentRecordResultMap" >
+    SELECT tb.*,re.freeze_note FROM 
+    	(SELECT pay.payment_id, pay.create_time,pay.mall_order_id,pay.product_detail,
+    	pay.buyer_company_name,pay.seller_company_name,pay.deal_money,
+    	ac.freeze_money,ac.use_money,pay.payment_status,pay.payment_no 
+			FROM 
+			<if test="dstatus !=null and dstatus ==0 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 0 AND is_handler = 1 UNION ALL SELECT * FROM tr_payment_record WHERE payment_status = 4) pay,user_account ac 
+		  		WHERE pay.buyer_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+		  	<if test="dstatus !=null and dstatus ==1 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 0 AND is_handler = 1) pay,user_account ac 
+		  		WHERE pay.buyer_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+		  	<if test="dstatus !=null and dstatus ==2 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 4) pay,user_account ac 
+		  		WHERE pay.buyer_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+
+			<if test=" prisename != null and prisename != ''">
+		  		AND tb.buyer_company_name LIKE CONCAT('%',#{prisename},'%')
+		  	</if>
+		  	<if test=" mallorderid != null and mallorderid != ''">
+		  		AND tb.mall_order_id LIKE  CONCAT('%',#{mallorderid},'%') or tb.payment_no LIKE  CONCAT('%',#{mallorderid},'%') 
+		  	</if>
+		  	<if test=" startTime != null ">
+		  		<![CDATA[ and tb.create_time >= #{startTime}]]>
+		  	</if>
+		  	<if test=" endTime != null">
+		  		<![CDATA[ and tb.create_time <= #{endTime}]]>
+		  	</if>
+		  	ORDER BY tb.payment_id desc
+		  	<if test="startNum!=null and endNum !=null ">
+		       	limit ${startNum},${endNum}
+		    </if> 
+    </select>
+
+    <!-- 冻结失败账单详情  -->
+    <select id="payFreezeDetail" parameterType="java.lang.Integer" resultType="com.smm.payCenter.domain.TransactionDetail" >
+       SELECT
+				  r.mall_order_id                AS mallOrderId,
+				  r.create_time                  AS createTime,
+				  r.seller_company_name          AS sellerCompanyName,
+				  c1.user_account_no             AS sellUserAccountNo,
+				  r.buyer_company_name           AS buyerCompanyName,
+				  c2.user_account_no             AS buyUserAccountNo,
+				  r.product_name                 AS productName,
+				  r.product_detail               AS productDetail,
+				  r.product_num                  AS productNum,
+				  r.product_num_unit             AS productNumUnit,
+				  r.deal_money                   AS dealMoney,
+				  r.order_create_time            AS orderCreateTime,
+				  r.settlement_type              AS settlementType,
+				  r.deal_type                    AS dealType,
+				  r.invoice,
+				  r.payment_status               AS paymentStatus,
+				  r.freeze_time			 		 AS freezeTime,
+				  r.done_time                    AS doneTime ,
+				  r.payment_id                   AS paymentId,
+				  r.payment_no                   AS trWaterId
+			FROM tr_payment_record r,
+			  user_pay_channel c1,
+			  user_pay_channel c2
+			WHERE r.seller_pay_channel_id = c1.user_pay_channel_id
+			    AND r.buyer_pay_channel_id = c2.user_pay_channel_id
+			    AND r.payment_id=#{id}
+    </select>
+    
+    <!-- 冻结失败账单总记录数  -->
+    <select id="queryPayFreezeNum" parameterType="java.util.Map" resultType="Integer" >
+    SELECT COUNT(*) FROM 
+    	(SELECT pay.payment_id, pay.create_time,pay.mall_order_id,pay.product_detail,
+    	pay.buyer_company_name,pay.seller_company_name,pay.deal_money,
+    	ac.freeze_money,ac.use_money,pay.payment_status,pay.payment_no
+			FROM 
+			<if test="dstatus !=null and dstatus ==0 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 0 AND is_handler = 1 UNION ALL SELECT * FROM tr_payment_record WHERE payment_status = 4) pay,user_account ac 
+		  		WHERE pay.seller_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+		  	<if test="dstatus !=null and dstatus ==1 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 0 AND is_handler = 1) pay,user_account ac 
+		  		WHERE pay.seller_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+		  	<if test="dstatus !=null and dstatus ==2 ">
+		  		(SELECT * FROM tr_payment_record WHERE payment_status = 4) pay,user_account ac 
+		  		WHERE pay.seller_user_id = ac.user_id) tb LEFT JOIN tr_freeze_record re ON tb.payment_id = re.payment_id
+				where 1=1 
+		  	</if>
+			<if test=" prisename != null and prisename != ''">
+		  		AND tb.buyer_company_name LIKE CONCAT('%',#{prisename},'%')
+		  	</if>
+		  	<if test=" mallorderid != null and mallorderid != ''">
+		  		AND tb.mall_order_id LIKE  CONCAT('%',#{mallorderid},'%') or tb.payment_no LIKE  CONCAT('%',#{mallorderid},'%') 
+		  	</if>
+		  	<if test=" startTime != null ">
+		  		<![CDATA[ and tb.create_time >= #{startTime}]]>
+		  	</if>
+		  	<if test=" endTime != null">
+		  		<![CDATA[ and tb.create_time <= #{endTime}]]>
+		  	</if>
+    </select>
+    
+    <update id="closeOrder" parameterType="Integer">
+		UPDATE tr_payment_record SET payment_status = 3 WHERE payment_id = #{paymentid}
+    </update>
+</mapper>

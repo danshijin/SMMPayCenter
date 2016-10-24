@@ -1,0 +1,106 @@
+<style>
+.mailBody {
+	position: absolute;
+	width: 856px;
+	height: 676px;
+	padding: 20px;
+}
+p {
+	line-height: 26px;
+	font-family: "微软雅黑", Arial;
+	font-weight: bold;
+	color: #333333;
+	font-size: 16px;
+}
+.emphasize {
+	font-weight: 700;
+	color: #2D91E5;
+}
+.foot {
+	color: #888888;
+	font-size: 13px;
+}
+li {
+	list-style: none;
+	color: #333333;
+	line-height: 22px;
+}
+#imgtxt ul {
+	display: inline-block;
+	margin: 0;
+	padding: 0;
+}
+table {
+	border-collapse: collapse;
+}
+table td {
+	border: 1px solid #aaa;
+}
+.left {
+	float: left;
+	margin-right: 5px;
+}
+.titleli {
+	font-size: 24px;
+}
+.contentli {
+	font-size: 13px;
+}
+.foot {
+	color: #888888;
+	font-size: 13px;
+}
+</style>
+<div class="mailBody">
+	<p>
+	<div class="page-content">
+		<#if block ??>
+		<div align="center" style="display: block;">
+			<span style="font-size: 25px;">已处理${upcList}条信息，共${upcList}条</span><br>
+			<br> 共导入入金记录${synCount}条<br> 跳过已有入金记录${skipCount}条<br>
+			附属帐户余额对比错误${excenum}条<br>
+			<br>
+			<table style="width: 80%;" border="1">
+				<tr align="center">
+					<td width="25%" height="30px;">系统账户余额:</td>
+					<td width="25%"><#if sysMoney ??>
+						¥${sysMoney?string(',###.##')}元 <#else> ¥0.00元 </#if></td>
+					<td width="25%">银行实际账户余额:</td>
+					<td width="25%">¥<span style="font-size: 15px; color: red">
+							<#if sysSJAMT ??> ${sysSJAMT?string(',###.##')} <#else> 0.00
+							</#if> </span>元
+					</td>
+				</tr>
+			</table>
+			<br>
+			<table style="width: 80%; border="1">
+				<tr align=" center" height="30px;">
+					<th width="20%">序号</th>
+					<th width="20%">企业名称</th>
+					<th width="20%">系统账户余额</th>
+					<th width="20%">银行实际账户余额</th>
+				</tr>
+				<#list excelist as exec>
+				<tr align="center" height="30px;">
+					<td>${exec.rownum}</td>
+					<td>${exec.useraccountname}</td>
+					<td>¥${exec.usermoney}元</td>
+					<td>¥<span style="font-size: 15px; color: red"> <#if
+							exec.usersjamt ??> ${exec.usersjamt?string(',###.##')} <#else>
+							0.00 </#if> </span>元
+					</td>
+				</tr>
+				</#list>
+			</table>
+		</div>
+		</#if>
+	</div>
+	</p>
+	<hr>
+	<p>
+		<span class="foot">此为系统邮件，请勿回复</span> <span class="foot">请保管好您的邮箱，避免账号被他人盗用</span>
+	</p>
+	<p>
+		<span class="foot">上海有色网版权所有2000-2015</span>
+	</p>
+</div>

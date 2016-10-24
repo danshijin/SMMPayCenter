@@ -1,0 +1,575 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smm.payCenter.dao.QueryAccessDAO">
+	<select id="queryPingtaimoney" resultType="com.smm.payCenter.domain.DayBalance">
+		SELECT
+			*
+		FROM
+			(
+				SELECT
+					tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.pay_money AS payMoney,tr.recv_money AS recvMoney, 
+					tr.outcome_money AS outcomeMoney,tr.total_money AS totalMoney,tr.create_time AS trcreatetime 
+				FROM
+					tr_day_balance tr
+				WHERE
+					tr.account = 0
+				<if test=" startTime != null ">
+			  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+			  	</if>
+			  	<if test=" endTime != null">
+			  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+			  	</if>
+			) t
+		LEFT JOIN (
+			SELECT 
+				td.total_money AS yesterdayTotalMoney,
+				td.account AS yaccount
+			FROM
+				tr_day_balance td
+			WHERE
+				td.account = 0
+			<if test=" ystartTime != null ">
+		  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+		  	</if>
+		  	<if test=" yendTime != null">
+		  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+		  	</if>
+		) g ON g.yaccount = t.account
+		AND g.yaccount = 0
+		UNION
+			SELECT
+				*
+			FROM
+				(
+					SELECT
+						tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.pay_money AS payMoney,tr.recv_money AS recvMoney, 
+						tr.outcome_money AS outcomeMoney,tr.total_money AS totalMoney,tr.create_time AS trcreatetime 
+					FROM
+						tr_day_balance tr
+					WHERE
+						tr.account = 0
+					<if test=" startTime != null ">
+				  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+				  	</if>
+				  	<if test=" endTime != null">
+				  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+				  	</if>
+				) t
+		RIGHT JOIN (
+				SELECT
+					td.total_money AS yesterdayTotalMoney,
+					td.account AS yaccount
+				FROM
+					tr_day_balance td
+				WHERE
+					td.account = 0
+				<if test=" ystartTime != null ">
+			  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+			  	</if>
+			  	<if test=" yendTime != null">
+			  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+			  	</if>
+			) g ON g.yaccount = t.account
+			AND g.yaccount = 0
+	</select>
+	
+	<select id="queryQiyemoney" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.DayBalance">
+		SELECT
+				t.*,g.*,uc.user_id,uc.company_name AS companyName,uc.user_name AS userName 
+			FROM
+				(
+					SELECT
+						tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.pay_money AS payMoney,tr.recv_money AS recvMoney, 
+						tr.outcome_money AS outcomeMoney,tr.total_money AS totalMoney,tr.create_time AS trcreatetime 
+					FROM
+						tr_day_balance tr
+					WHERE
+						tr.account != 0
+					<if test=" startTime != null ">
+				  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+				  	</if>
+				  	<if test=" endTime != null">
+				  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+				  	</if>
+				) t
+			LEFT JOIN (
+				SELECT 
+					td.total_money AS yesterdayTotalMoney,
+					td.account AS yaccount
+				FROM
+					tr_day_balance td
+				WHERE
+					td.account != 0
+				<if test=" ystartTime != null ">
+			  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+			  	</if>
+			  	<if test=" yendTime != null">
+			  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+			  	</if>
+			) g ON g.yaccount = t.account 
+			AND g.yaccount != 0 
+			LEFT JOIN 
+			user_account uc 
+			ON t.account = uc.user_id WHERE 1 = 1 
+			<if test=" username != null and username != ''">
+		  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+		  	</if>
+		  	<if test=" companyname != null and companyname != ''">
+		  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+		  	</if>
+			UNION
+				SELECT
+					t.*,g.*,uc.user_id,uc.company_name,uc.user_name
+				FROM
+					(
+						SELECT
+							tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.pay_money AS payMoney,tr.recv_money AS recvMoney, 
+							tr.outcome_money AS outcomeMoney,tr.total_money AS totalMoney,tr.create_time AS trcreatetime 
+						FROM
+							tr_day_balance tr
+						WHERE
+							tr.account != 0
+						<if test=" startTime != null ">
+					  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+					  	</if>
+					  	<if test=" endTime != null">
+					  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+					  	</if>
+					) t
+			RIGHT JOIN (
+					SELECT
+						td.total_money AS yesterdayTotalMoney,
+						td.account AS yaccount
+					FROM
+						tr_day_balance td
+					WHERE
+						td.account != 0
+					<if test=" ystartTime != null ">
+				  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+				  	</if>
+				  	<if test=" yendTime != null">
+				  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+				  	</if>
+				) g ON g.yaccount = t.account
+				AND g.yaccount != 0 
+				LEFT JOIN 
+				user_account uc 
+				ON g.yaccount = uc.user_id WHERE 1 = 1 
+				<if test=" username != null and username != ''">
+			  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+			  	</if>
+			  	<if test=" companyname != null and companyname != ''">
+			  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+			  	</if>
+			  	<if test="startNum!=null and endNum !=null ">
+			       	limit ${startNum},${endNum}
+			    </if>
+	</select>
+
+	<!-- 查询总记录数 -->
+	<select id="queryTotalRecord" parameterType="java.util.Map" resultType="Integer">
+		select count(*) from (SELECT a.ud userid,a.username,a.company,a.use_money AS totalmoney,
+			MAX(CASE a.trtype WHEN 0  THEN a.trmoney ELSE 0 END) AS zhuanru,
+			MAX(CASE a.trtype WHEN 1 THEN a.trmoney ELSE 0 END) AS zhuanchu,
+			MAX(CASE a.trtype WHEN 2 THEN a.trmoney ELSE 0 END) AS chujin,
+			MAX(CASE a.trtype WHEN 3 THEN a.trmoney ELSE 0 END) AS rujin
+			FROM (
+			SELECT uc.user_id ud,uc.user_name username,uc.company_name company,uc.use_money,
+			SUM(tr.tr_money) trmoney,tr.tr_type trtype,uc.user_id truserid
+			FROM user_account uc LEFT JOIN (SELECT * FROM tr_record WHERE tr_apply_status = 1) tr
+			ON uc.user_id = tr.user_id 
+			WHERE  uc.audit_status = 1 
+			<!-- 
+	 		<if test=" starttime != null ">
+		  		<![CDATA[ and tr.replay_time >= #{starttime}]]>
+		  	</if>
+		  	<if test=" endtime != null">
+		  		<![CDATA[ and tr.replay_time <= #{endtime}]]>
+		  	</if>
+		  	 -->
+			GROUP BY uc.user_id,tr.tr_type
+			) a WHERE 1 = 1 
+			<if test=" username != null and username != ''">
+		  		AND a.username LIKE CONCAT('%',#{username},'%') 
+		  	</if>
+		  	<if test=" companyname != null and companyname != ''">
+		  		AND a.company LIKE CONCAT('%',#{companyname},'%') 
+		  	</if>
+			GROUP BY a.truserid ORDER BY a.truserid) c 
+	</select>
+	
+	<insert id="insertDayBalance" parameterType="java.util.Map">
+		INSERT INTO tr_day_balance  
+			( 
+			account, 
+			use_money, 
+			freeze_money, 
+			total_money,
+			pay_money,
+			recv_money,
+			income_money,
+			outcome_money,
+			create_time
+			)
+			VALUES(
+			#{username},
+			#{usemoney},
+			#{freezemoney},
+			#{totalmoney},
+			#{paymoney},
+			#{recvmoney},
+			#{incomemoney},
+			#{outcomemoney},
+			#{createtime}
+			)
+  </insert>
+  
+  	<!-- 查询会员列表 -->
+	<select id="queryUserAccount" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.UserAccount">
+		SELECT user_id AS userId,user_name AS userName,use_money AS useMoney,freeze_money AS freezeMoney, 
+			ub.shoukuan as shoukuan,ub.zhifu as zhifu,ub.chujin as chujin,ub.rujin as rujin 
+			FROM user_account uc LEFT JOIN (
+			SELECT a.ud userid,a.username,a.company,a.use_money AS totalmoney, 
+			MAX(CASE a.trtype WHEN 0 THEN a.trmoney ELSE 0 END) AS shoukuan, 
+			MAX(CASE a.trtype WHEN 1 THEN a.trmoney ELSE 0 END) AS zhifu, 
+			MAX(CASE a.trtype WHEN 2 THEN a.trmoney ELSE 0 END) AS chujin, 
+			MAX(CASE a.trtype WHEN 3 THEN a.trmoney ELSE 0 END) AS rujin FROM 
+			( SELECT uc.user_id ud,uc.user_name username,uc.company_name company,uc.use_money, SUM(tr.tr_money) trmoney,tr.tr_type trtype,uc.user_id truserid 
+			FROM user_account uc LEFT JOIN (SELECT * FROM tr_record WHERE tr_apply_status = 1 
+			<if test="startTime !=null and startTime != ''">
+				AND tr_apply_time &gt;= #{startTime}
+			</if>
+			<if test="endTime !=null and endTime != ''">
+				AND tr_apply_time &lt;= #{endTime}
+			</if>
+			) tr ON uc.user_id = tr.user_id 
+			WHERE uc.audit_status = 1 GROUP BY uc.user_id,tr.tr_type ) a 
+			WHERE 1 = 1 GROUP BY a.truserid ORDER BY a.truserid) ub ON uc.user_id = ub.userid 
+	</select>
+	
+	<!-- 冻结查询   平台资金 -->
+	<select id="queryDongJiePingTai" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.DayBalance">
+		SELECT
+				*
+			FROM
+				(
+					SELECT
+						tr.id AS id,tr.account,tr.freeze_money AS freezeMoney,tr.pay_money AS payMoney 
+					FROM
+						tr_day_balance tr
+					WHERE
+						tr.account = 0
+					<if test=" startTime != null ">
+				  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+				  	</if>
+				  	<if test=" endTime != null">
+				  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+				  	</if>
+				) t
+			LEFT JOIN (
+				SELECT 
+					td.freeze_money AS yesterdayFreezeMoney,
+					td.account AS yaccount
+				FROM
+					tr_day_balance td
+				WHERE
+					td.account = 0
+				<if test=" ystartTime != null ">
+			  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+			  	</if>
+			  	<if test=" yendTime != null">
+			  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+			  	</if>
+			) g ON g.yaccount = t.account
+			AND g.yaccount = 0
+			UNION
+				SELECT
+					*
+				FROM
+					(
+						SELECT
+							tr.id AS id,tr.account,tr.freeze_money AS freezeMoney,tr.pay_money AS payMoney 
+						FROM
+							tr_day_balance tr
+						WHERE
+							tr.account = 0
+						<if test=" startTime != null ">
+					  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+					  	</if>
+					  	<if test=" endTime != null">
+					  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+					  	</if>
+					) t
+			RIGHT JOIN (
+					SELECT
+						td.freeze_money AS yesterdayFreezeMoney,
+						td.account AS yaccount
+					FROM
+						tr_day_balance td
+					WHERE
+						td.account = 0
+					<if test=" ystartTime != null ">
+				  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+				  	</if>
+				  	<if test=" yendTime != null">
+				  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+				  	</if>
+				) g ON g.yaccount = t.account
+				AND g.yaccount = 0
+	</select>
+	<!-- 冻结查询  企业资金 -->
+	<select id="queryDongJieQiYe" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.DayBalance">
+		SELECT
+				t.*,g.*,uc.user_id,uc.company_name AS companyName,uc.user_name AS userName  
+			FROM
+				(
+					SELECT
+						tr.id,tr.account,tr.freeze_money AS freezeMoney,tr.pay_money AS payMoney,tr.create_time 
+					FROM
+						tr_day_balance tr
+					WHERE
+						tr.account != 0
+					<if test=" startTime != null ">
+				  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+				  	</if>
+				  	<if test=" endTime != null">
+				  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+				  	</if>
+				) t
+			LEFT JOIN (
+				SELECT 
+					td.freeze_money AS yesterdayFreezeMoney,
+					td.account AS yaccount
+				FROM
+					tr_day_balance td
+				WHERE
+					td.account != 0
+				<if test=" ystartTime != null ">
+			  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+			  	</if>
+			  	<if test=" yendTime != null">
+			  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+			  	</if>
+			) g ON g.yaccount = t.account 
+			AND g.yaccount != 0 
+			LEFT JOIN 
+			user_account uc ON 
+			t.account = uc.user_id WHERE 1 = 1 
+			<if test=" username != null and username != ''">
+		  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+		  	</if>
+		  	<if test=" companyname != null and companyname != ''">
+		  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+		  	</if>
+			UNION
+				SELECT
+					t.*,g.*,uc.user_id,uc.company_name AS companyName,uc.user_name AS userName
+				FROM
+					(
+						SELECT
+							tr.id,tr.account,tr.freeze_money AS freezeMoney,tr.pay_money AS payMoney,tr.create_time 
+						FROM
+							tr_day_balance tr
+						WHERE
+							tr.account != 0
+						<if test=" startTime != null ">
+					  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+					  	</if>
+					  	<if test=" endTime != null">
+					  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+					  	</if>
+					) t
+			RIGHT JOIN (
+					SELECT
+						td.freeze_money AS yesterdayFreezeMoney,
+						td.account AS yaccount
+					FROM
+						tr_day_balance td
+					WHERE
+						td.account != 0
+					<if test=" ystartTime != null ">
+				  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+				  	</if>
+				  	<if test=" yendTime != null">
+				  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+				  	</if>
+				) g ON g.yaccount = t.account
+				AND g.yaccount != 0 
+				LEFT JOIN 
+				user_account uc 
+				ON g.yaccount = uc.user_id WHERE 1 = 1 
+				<if test=" username != null and username != ''">
+			  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+			  	</if>
+			  	<if test=" companyname != null and companyname != ''">
+			  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+			  	</if>
+				<if test="startNum != null and endNum != null ">
+			       	limit ${startNum},${endNum}
+			    </if>
+	</select>
+	<!-- 可用余额  平台资金 -->
+	<select id="queryYuEPingTai" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.DayBalance">
+			SELECT
+					*
+				FROM
+					(
+						SELECT
+							tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.freeze_money AS freezeMoney,tr.use_money AS useMoney 
+						FROM
+							tr_day_balance tr
+						WHERE
+							tr.account = 0
+						<if test=" startTime != null ">
+					  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+					  	</if>
+					  	<if test=" endTime != null">
+					  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+					  	</if>
+					) t
+				LEFT JOIN (
+					SELECT 
+						td.use_money AS yesterdayUseMoney,
+						td.account AS yaccount
+					FROM
+						tr_day_balance td
+					WHERE
+						td.account = 0
+					<if test=" ystartTime != null ">
+				  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+				  	</if>
+				  	<if test=" yendTime != null">
+				  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+				  	</if>
+				) g ON g.yaccount = t.account
+				AND g.yaccount = 0
+				UNION
+					SELECT
+						*
+					FROM
+						(
+							SELECT
+								tr.id AS id,tr.account,tr.income_money AS incomeMoney,tr.freeze_money AS freezeMoney,tr.use_money AS useMoney 
+							FROM
+								tr_day_balance tr
+							WHERE
+								tr.account = 0
+							<if test=" startTime != null ">
+						  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+						  	</if>
+						  	<if test=" endTime != null">
+						  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+						  	</if>
+						) t
+				RIGHT JOIN (
+						SELECT
+							td.use_money AS yesterdayUseMoney,
+							td.account AS yaccount
+						FROM
+							tr_day_balance td
+						WHERE
+							td.account = 0
+						<if test=" ystartTime != null ">
+					  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+					  	</if>
+					  	<if test=" yendTime != null">
+					  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+					  	</if>
+					) g ON g.yaccount = t.account
+					AND g.yaccount = 0
+	</select>
+	<!-- 可用余额  企业资金 -->
+	<select id="queryYuEQiYe" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.DayBalance">
+		SELECT
+				t.*,g.*,uc.user_id,uc.company_name AS companyName,uc.user_name AS userName  
+			FROM
+				(
+					SELECT
+						tr.id,tr.account,tr.freeze_money AS freezeMoney,tr.income_money AS incomeMoney,tr.use_money useMoney,tr.create_time 
+					FROM
+						tr_day_balance tr
+					WHERE
+						tr.account != 0
+					<if test=" startTime != null ">
+				  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+				  	</if>
+					<if test=" endTime != null">
+				  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+				  	</if>
+				) t
+			LEFT JOIN (
+				SELECT 
+					td.use_money AS yesterdayUseMoney,
+					td.account AS yaccount
+				FROM
+					tr_day_balance td
+				WHERE
+					td.account != 0
+				<if test=" ystartTime != null ">
+			  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+			  	</if>
+				<if test=" yendTime != null">
+			  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+			  	</if>
+			) g ON g.yaccount = t.account 
+			AND g.yaccount != 0 
+			LEFT JOIN 
+			user_account uc 
+			ON t.account = uc.user_id WHERE 1 = 1 
+			<if test=" username != null and username != ''">
+		  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+		  	</if>
+		  	<if test=" companyname != null and companyname != ''">
+		  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+		  	</if>
+			UNION
+				SELECT
+					t.*,g.*,uc.user_id,uc.company_name AS companyName,uc.user_name AS userName
+				FROM
+					(
+						SELECT
+							tr.id,tr.account,tr.freeze_money AS freezeMoney,tr.income_money AS incomeMoney,tr.use_money useMoney,tr.create_time
+						FROM
+							tr_day_balance tr
+						WHERE
+							tr.account != 0
+						<if test=" startTime != null ">
+					  		<![CDATA[ AND tr.create_time >= #{startTime}]]>
+					  	</if>
+						<if test=" endTime != null">
+					  		<![CDATA[ AND tr.create_time <= #{endTime}]]>
+					  	</if>
+					) t
+			RIGHT JOIN (
+					SELECT
+						td.use_money AS yesterdayUseMoney,
+						td.account AS yaccount
+					FROM
+						tr_day_balance td
+					WHERE
+						td.account != 0
+					<if test=" ystartTime != null ">
+				  		<![CDATA[ AND td.create_time >= #{ystartTime}]]>
+				  	</if>
+					<if test=" yendTime != null">
+				  		<![CDATA[ AND td.create_time <= #{yendTime}]]>
+				  	</if>
+				) g ON g.yaccount = t.account
+				AND g.yaccount != 0 
+				LEFT JOIN 
+				user_account uc 
+				ON g.yaccount = uc.user_id WHERE 1 = 1 
+				<if test=" username != null and username != ''">
+			  		AND uc.user_name LIKE CONCAT('%',#{username},'%') 
+			  	</if>
+			  	<if test=" companyname != null and companyname != ''">
+			  		AND uc.company_name LIKE CONCAT('%',#{companyname},'%') 
+			  	</if>
+				<if test="startNum != null and endNum != null ">
+			       	limit ${startNum},${endNum}
+			    </if>
+	</select>
+</mapper>

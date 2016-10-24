@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="en" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="en" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en" class="no-js">
+<!--<![endif]-->
+
+<head>
+<meta charset="utf-8">
+<title>出入金查询</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta content="width=device-width, initial-scale=1" name="viewport">
+<meta content="" name="description">
+<meta content="" name="author">
+<link href="${request.getContextPath()}/Public/assets/admin/css/css.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/simple-line-icons/simple-line-icons.min.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/uniform/css/uniform.default.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.css" rel="stylesheet" type="text/css"/>
+<link href="${request.getContextPath()}/Public/assets/global/css/components-rounded.css" id="style_components" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/css/plugins.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/admin/css/layout.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/admin/css/themes/default.css" rel="stylesheet" type="text/css" id="style_color">
+<link href="${request.getContextPath()}/Public/assets/admin/css/custom.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/css/bootstrap-datepicker.min.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" type="text/css" href="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.css" />
+<link href="${request.getContextPath()}/Public/assets/admin/css/common.css" rel="stylesheet" type="text/css">
+<link href="${request.getContextPath()}/Public/assets/global/css/kkpager.css" rel="stylesheet" type="text/css">
+<link rel="shortcut icon" href="${request.getContextPath()}/Public/favicon.ico">
+<script>
+	BASE_URL = '${request.getContextPath()}'
+</script>
+<style type="text/css">
+
+.table-condensed {
+	width: 100%;
+}
+
+.datepicker-inline {
+	width: 100%;
+}
+
+.col-md-4,.col-md-6,.col-md-7,.col-md-12 {
+	padding-right: 0px;
+	padding-left: 0px;
+}
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+  border-bottom: 1px solid #ddd;
+}
+</style>
+
+</head>
+
+<body class="page-header-top-fixed page-footer-fixed">
+	
+	<div class="page-header">
+		<!--头部开始-->
+		<#include "/include/top.html" />
+		<!-- 头部信息结束 -->
+	</div>
+	
+	<div class="clearfix">
+	</div>
+	<div class="page-container">
+		<#include "/include/menu.html" />
+		<!-- 首页内容开始 -->
+		<div class="page-content-wrapper">
+		<div class="page-content" >
+			<div class="container-fluid">
+				<div class="col-md-12" style="margin-top: 50px;">
+					<div class="row">
+						<div class="col-md-12">
+							<div class="portlet light">
+									<div class="portlet-body">
+										<div  style="margin-top: -4%;">
+											<div style="float: left;" class="col-md-6">
+											<input id="dstatus" name="dstatus" type="hidden" value="${dstatus}">
+												<div class="btn-group btn-group-justified" > 
+													<a href="#" id="a-1" value="-1" onclick="openStatus(-1);" 
+															<#if dstatus?? && dstatus=-1>class="btn red"<#else>class="btn btn-default"</#if>>余额查询</a>
+													<a href="#" id="a0" value="0" onclick="openStatus(0);" 
+															<#if dstatus?? && dstatus=0>class="btn red"<#else>class="btn btn-default"</#if>>冻结查询</a>
+													<a href="#" id="a1" value="1" onclick="openStatus(1);" 
+															<#if dstatus?? && dstatus=1>class="btn red"<#else>class="btn btn-default"</#if>>可用余额</a>
+												</div>
+											</div>
+										</div>
+										<div style="margin-top: 5%;">
+										<form action="${request.getContextPath()}/queryAccessGold/query.do" method="post" id="myForm">
+											<input id="dstatus" name="dstatus" type="hidden" value="${dstatus}">
+											<label>企业名称:&nbsp;<input class="form-control input-small2  input-inline" type="text"  placeholder="企业名称" name="companyname" id="companyname" value="${companyname}"></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											<label>企业邮箱:&nbsp;<input class="form-control input-small2  input-inline" type="text"  placeholder="企业邮箱" name="username" id="username" value="${username}"></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+											<label>日期:&nbsp;<input class="form-control input-small2  input-inline" type="search" placeholder="日期" name="replaytime" id="replaytime" value="${replaytime}" onClick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"></label>&nbsp;&nbsp;&nbsp;&nbsp;
+											<button  class="btn red"  type="submit" >
+												<i class="fa fa-search"></i> 搜索
+											</button>&nbsp;&nbsp;&nbsp;&nbsp;
+											<button  class="btn red"  type="button" onclick="shuaxin();">
+												<i class="fa fa-search"></i> 刷新
+											</button>  
+										</form>
+										<#if dstatus ?? && dstatus = -1>
+										<!-- 余额查询 -->
+										<br><br>			
+										<span style="font-size: 25px;">平台资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printPingtai(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="pingtaidiv">
+										<table class="table table-striped table-bordered table-hover ttTbl">
+											<tr align="center" style="height: 40px;">
+												<td></td>
+												<td>前日余额</td>
+												<td>本日入金</td>
+												<td>今日支付</td>
+												<td>今日收款</td>
+												<td>本日出金</td>
+												<td>账户总余额</td>
+											</tr>
+											<tr align="center" style="height: 40px;">
+												<td>小计</td>
+												<td>
+													<#if queryPingtai.yesterdayTotalMoney ??>
+														￥${queryPingtai.yesterdayTotalMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.incomeMoney ??>
+														￥${queryPingtai.incomeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.payMoney ??>
+														￥${queryPingtai.payMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.recvMoney ??>
+														￥${queryPingtai.recvMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.outcomeMoney ??>
+														￥${queryPingtai.outcomeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.totalMoney ??>
+														￥${queryPingtai.totalMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+											</tr>
+										</table>
+										</div>
+										<br>
+										<span style="font-size: 25px;">企业资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printQiye(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="qiyediv">
+											<table class="table table-striped table-bordered table-hover ttTbl">
+												<tr align="center" style="height: 40px;">
+													<td>企业名称</td>
+													<td>前日余额</td>
+													<td>本日入金</td>
+													<td>今日支付</td>
+													<td>今日收款</td>
+													<td>本日出金</td>
+													<td>账户总余额</td>
+												</tr>
+												<#list queryQiye as qiye>
+													<tr align="center" style="height: 40px;">
+														<td>${qiye.companyName}</td>
+														<td>
+															<#if qiye.yesterdayTotalMoney ??>
+																￥${qiye.yesterdayTotalMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.incomeMoney ??>
+																￥${qiye.incomeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.payMoney ??>
+																￥${qiye.payMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.recvMoney ??>
+																￥${qiye.recvMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.outcomeMoney ??>
+																￥${qiye.outcomeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.totalMoney ??>
+																￥${qiye.totalMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+													</tr>
+												</#list>
+											</table>
+										</div>
+									</div>
+									</#if>
+									<#if dstatus ?? && dstatus = 0>
+									<!-- 冻结查询-->
+									<br><br>
+										<span style="font-size: 25px;">平台资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printPingtai(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="pingtaidiv">
+										<table class="table table-striped table-bordered table-hover ttTbl">
+											<tr align="center" style="height: 40px;">
+												<td></td>
+												<td>昨日冻结金额</td>
+												<td>今日冻结金额</td>
+												<td>今日支付</td>
+												<td>今日冻结金额</td>
+											</tr>
+											<tr align="center" style="height: 40px;">
+												<td>小计</td>
+												<td>
+													<#if queryPingtai.yesterdayFreezeMoney ??>
+														￥${queryPingtai.yesterdayFreezeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.freezeMoney ??>
+														￥${queryPingtai.freezeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.payMoney ??>
+														￥${queryPingtai.payMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.freezeMoney ??>
+														￥${queryPingtai.freezeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+											</tr>
+										</table>
+										</div>
+										<br>
+										<span style="font-size: 25px;">企业资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printQiye(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="qiyediv">
+											<table class="table table-striped table-bordered table-hover ttTbl">
+												<tr align="center" style="height: 40px;">
+													<td>企业名称</td>
+													<td>昨日冻结金额</td>
+													<td>今日冻结金额</td>
+													<td>今日支付</td>
+													<td>今日冻结金额</td>
+												</tr>
+												<#list queryQiye as qiye>
+													<tr align="center" style="height: 40px;">
+														<td>${qiye.companyName}</td>
+														<td>
+															<#if qiye.yesterdayFreezeMoney ??>
+																￥${qiye.yesterdayFreezeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.freezeMoney ??>
+																￥${qiye.freezeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.payMoney ??>
+																￥${qiye.payMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.freezeMoney ??>
+																￥${qiye.freezeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+													</tr>
+												</#list>
+											</table>
+										</div>
+									</div>
+									</#if>
+									<#if dstatus ?? && dstatus = 1>
+									<!-- 可用余额-->
+									<br><br>
+										<span style="font-size: 25px;">平台资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printPingtai(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="pingtaidiv">
+										<table class="table table-striped table-bordered table-hover ttTbl">
+											<tr align="center" style="height: 40px;">
+												<td></td>
+												<td>昨日可用余额</td>
+												<td>今日入金</td>
+												<td>今日新增冻结</td>
+												<td>今日可用余额</td>
+											</tr>
+											<tr align="center" style="height: 40px;">
+												<td>小计</td>
+												<td>
+													<#if queryPingtai.yesterdayUseMoney ??>
+														￥${queryPingtai.yesterdayUseMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.incomeMoney ??>
+														￥${queryPingtai.incomeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.freezeMoney ??>
+														￥${queryPingtai.freezeMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+												<td>
+													<#if queryPingtai.useMoney ??>
+														￥${queryPingtai.useMoney?string(',###.##')}
+													<#else>
+														￥0.00
+													</#if>
+												</td>
+											</tr>
+										</table>
+										</div>
+										<br>
+										<span style="font-size: 25px;">企业资金</span>&nbsp;&nbsp;&nbsp;&nbsp;
+										<a  class="btn red" onclick="printQiye(1)">
+											<i class="fa fa-print"></i> 打印
+										</a>
+										<br><br>
+										<div id="qiyediv">
+											<table class="table table-striped table-bordered table-hover ttTbl">
+												<tr align="center" style="height: 40px;">
+													<td>企业名称</td>
+													<td>昨日可用余额</td>
+													<td>今日入金</td>
+													<td>今日新增冻结</td>
+													<td>今日可用余额</td>
+												</tr>
+												<#list queryQiye as qiye>
+													<tr align="center" style="height: 40px;">
+														<td>${qiye.companyName}</td>
+														<td>
+															<#if qiye.yesterdayUseMoney ??>
+																￥${qiye.yesterdayUseMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.incomeMoney ??>
+																￥${qiye.incomeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.freezeMoney ??>
+																￥${qiye.freezeMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+														<td>
+															<#if qiye.useMoney ??>
+																￥${qiye.useMoney?string(',###.##')}
+															<#else>
+																￥0.00
+															</#if>
+														</td>
+													</tr>
+												</#list>
+											</table>
+										</div>
+									</div>
+									</#if>
+									</div>	
+									<div style="width:80%;margin:0 auto;">
+										<div id="kkpager"></div>
+										<input type="hidden" value="${totalPage}" id="totalPage">
+										<input type="hidden" value="${totalRecords}" id="totalRecords">  
+									</div>
+								</div>
+							</div>
+						</div>	
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- END PAGE CONTENT -->
+	</div>
+	<!-- END PAGE CONTAINER -->
+	<!-- 底部开始 -->
+
+	<!-- 底部结束 -->
+
+	<!--[if lt IE 9]>
+<script src="${request.getContextPath()}/Public/assets/global/plugins/respond.min.js"></script>
+<script src="${request.getContextPath()}/Public/assets/global/plugins/excanvas.min.js"></script>
+<![endif]-->
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery-migrate.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-hover-dropdown/bootstrap-hover-dropdown.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery-slimscroll/jquery.slimscroll.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery.blockui.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery.cokie.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/uniform/jquery.uniform.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery-notific8/jquery.notific8.min.js"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/jquery.sparkline.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/bootstrap-datepicker/js/bootstrap-datepicker-index.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/scripts/metronic.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/admin/scripts/layout.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/admin/scripts/commonUtils.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/highcharts.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/kkpager.min.js" type="text/javascript"></script>
+	<script src="${request.getContextPath()}/Public/assets/global/plugins/fancybox/source/jquery.fancybox.pack.js" type="text/javascript"></script>
+	<script type="text/javascript" src="${request.getContextPath()}/Public/My97DatePicker/WdatePicker.js"></script>
+	<script>
+		jQuery(document).ready(function() {
+
+			Metronic.init(); // init metronic core componets
+			Layout.init(); // init layout
+			//IndexComponent.init(); // init index component
+			
+// 			removeVal();
+		});
+		
+		//初始化分页插件
+		function getParameter(name) { 
+			var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)"); 
+			var r = window.location.search.substr(1).match(reg); 
+			if (r!=null) return unescape(r[2]); return null;
+		}
+		//init
+		$(function(){
+// 			页面搜索条件
+			var dstatus= $('#dstatus').val();
+			//alert(dstatus);
+			var companyname= $('#companyname').val();
+			var username= $('#username').val();
+			var replaytime= $('#replaytime').val();
+			
+			var totalPage = $('#totalPage').val();
+			var totalRecords = $('#totalRecords').val();
+			var pageNo = getParameter('pno');
+			if(!pageNo){
+				pageNo = 1;
+			}
+			//生成分页
+			//有些参数是可选的，比如lang，若不传有默认值
+			kkpager.generPageHtml({
+				pno : pageNo,
+				//总页码
+				total : totalPage,
+				//总数据条数
+				totalRecords : totalRecords,
+				
+				getLink : function(n){
+					return this.hrefFormer + this.hrefLatter + "?pno="+n+"&companyname="+companyname+"&username="+username+"&dstatus="+dstatus+"&replaytime="+replaytime;
+				}	
+			});
+		});
+		
+		function openStatus(dstatus){
+			if(dstatus==-1){
+				$('#a-1').attr("class","btn red");
+				$('#a0').attr("class","btn btn-default");
+				$('#a1').attr("class","btn btn-default");
+			}else if(dstatus==0){
+				$('#a0').attr("class","btn red");
+				$('#a-1').attr("class","btn btn-default");
+				$('#a1').attr("class","btn btn-default");
+			}else if(dstatus==1){
+				$('#a1').attr("class","btn red");
+				$('#a-1').attr("class","btn btn-default");
+				$('#a0').attr("class","btn btn-default");
+			}
+			var url=BASE_URL+"/queryAccessGold/query.do?dstatus="+dstatus;
+			window.location =url;
+		}
+		//刷新
+		function shuaxin(){
+			window.location.href="${request.getContextPath()}/queryAccessGold/query.do";
+		}
+		//打印
+		function printPingtai(oper)
+		{
+			if (oper < 10){
+				bdhtml=window.document.body.innerHTML;//获取当前页的html代码
+				window.document.body.innerHTML=$("#pingtaidiv").html();
+				window.print();
+				window.document.body.innerHTML=bdhtml;
+			} else {
+				window.print();
+			}
+
+		}
+		function printQiye(oper)
+		{
+			if (oper < 10){
+				bdhtml=window.document.body.innerHTML;//获取当前页的html代码
+	/* 			sprnstr="<!--startprint"+oper+"-->";//设置打印开始区域
+				eprnstr="<!--endprint"+oper+"-->";//设置打印结束区域
+				prnhtml=bdhtml.substring(bdhtml.indexOf(sprnstr)+18); //从开始代码向后取html
+			
+				prnhtml=prnhtml.substring(0,prnhtml.indexOf(eprnstr));//从结束代码向前取html */
+				window.document.body.innerHTML=$("#qiyediv").html();
+				window.print();
+				window.document.body.innerHTML=bdhtml;
+			} else {
+				window.print();
+			}
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.BankBalanceDAO" >
+
+ 	<!--  获得要查询的企业编号信息  -->
+    <select id="getCompanyAccountNO" resultType="com.smm.payCenter.domain.AccountChannelEntity" parameterType="java.util.Map">
+        SELECT 
+        a.user_id,
+        a.user_name,
+        a.company_name,
+        b.user_account_no,
+        b.user_account_status,
+		(
+			SELECT 
+				replay_time 
+			FROM 
+			tr_record 
+			WHERE 
+			user_id=a.user_id 
+			AND 
+			user_pay_channel_id=b.user_pay_channel_id 
+			ORDER BY 
+			replay_time DESC 
+			LIMIT 0,1
+		) AS replay_time
+        FROM 
+		user_account a
+		LEFT JOIN 
+		user_pay_channel b
+		ON a.user_id=b.user_id
+		LEFT JOIN
+		da_pay_channel c
+		ON b.pay_channel_id=c.pay_channe_id
+		WHERE a.audit_status=1
+		AND b.user_account_status=0
+		AND c.status=1
+		AND c.channel_name='中信银企直联'
+		
+        <if test=" userName != null and userName != ''">
+  			and a.user_name like  CONCAT('%',#{userName},'%')
+  		</if>
+        <if test=" companyName != null and companyName != ''">
+  			and a.company_name like  CONCAT('%',#{companyName},'%')
+  		</if>
+        <if test=" userAccountNO != null and userAccountNO != ''">
+  			and a.company_name = #{userAccountNO}
+  		</if>
+  		
+  		ORDER BY a.last_login_time DESC,b.user_account_no ASC
+  		
+  		<!-- 分页 -->
+		<if test="startNum!=null and endNum !=null ">
+			limit ${startNum},${endNum}
+		</if>
+        
+        
+    </select>
+    <!--  获得要查询的企业编号信息的数据总量  -->
+    <select id="getCompanyAccountNOCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+        SELECT 
+        count(b.user_account_no)  
+        FROM 
+		user_account a
+		LEFT JOIN 
+		user_pay_channel b
+		ON a.user_id=b.user_id
+		WHERE a.audit_status=1
+		AND b.user_account_status=0
+		
+        <if test=" userName != null and userName != ''">
+  			and a.user_name like  CONCAT('%',#{userName},'%')
+  		</if>
+        <if test=" companyName != null and companyName != ''">
+  			and a.company_name like  CONCAT('%',#{companyName},'%')
+  		</if>
+        <if test=" userAccountNO != null and userAccountNO != ''">
+  			and a.company_name = #{userAccountNO}
+  		</if>       
+        
+    </select>
+</mapper>

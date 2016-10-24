@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smm.payCenter.dao.ArtificialTransferDAO">
+ 
+<!-- 
+	<select id="ArtificialTransferList" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.ArtificialTransferVO">
+		SELECT pay.order_create_time AS orderCreateTime ,pay.payment_id AS paymentId,pay.mall_order_id AS mallOrderId,
+		tr.out_user_company_name AS outUserCompanyName,
+		ch.user_account_no AS userAccountNo,pay.deal_money AS dealMoney,tr.desc AS reason,pay.payment_status AS paymentStatus  
+		FROM tr_payment_record pay,tr_transfer_record tr,user_pay_channel ch  
+		WHERE pay.payment_id = tr.payment_id AND tr.out_user_channel_id = ch.user_pay_channel_id 
+		<if test="username!=null and  username!='' ">
+			and tr.out_user_company_name like '%${username}%'
+		</if>
+		<if test="paymentid!=null and  paymentid!='' ">
+			and pay.payment_id like '%${paymentid}%'
+		</if>
+		<if test="startTime !=null and startTime != ''">
+			and pay.order_create_time &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime != ''">
+			and pay.order_create_time &lt;= #{endTime}
+		</if>
+		<if test="dstatus !=null and dstatus != -1">
+			and pay.payment_status = ${dstatus}
+		</if>
+		<if test="dstatus.equals('-1')">
+			AND pay.payment_status = 6 OR pay.payment_status = 7 
+			OR pay.payment_status = 8 OR pay.payment_status = 11
+		</if>
+		<if test="startNum!=null and endNum !=null ">
+        	limit ${startNum},${endNum}
+        </if>
+	</select>
+ -->	
+ 
+ 	<select id="ArtificialTransferList" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.ArtificialTransferVO">
+		SELECT 
+		pay.create_time AS createTime ,
+		pay.payment_id AS paymentId,
+		pay.payment_no AS paymentNo,
+		pay.mall_order_id AS mallOrderId,
+		tr.out_user_company_name AS outUserCompanyName,
+		tr.out_user_channel_id AS userChannelId,
+		uc.user_account_no AS userAccountNo,
+		pay.deal_money AS dealMoney,
+		tr.desc AS reason,
+		tr.status AS status  
+		FROM tr_payment_record pay,tr_transfer_record tr,user_pay_channel uc
+		WHERE pay.payment_id = tr.payment_id 
+		AND uc.user_pay_channel_id = tr.out_user_channel_id 
+		<if test="username!=null and  username!='' ">
+			and tr.out_user_company_name like CONCAT('%',#{username},'%')
+		</if>
+		<if test="paymentid!=null and  paymentid!='' ">
+			and (pay.mall_order_id like CONCAT('%',#{paymentid},'%') or pay.payment_no like CONCAT('%',#{paymentid},'%'))
+		</if>
+		<if test="startTime !=null and startTime != ''">
+			and pay.create_time &gt;= #{startTime}
+		</if>
+		<if test="endTime !=null and endTime != ''">
+			and pay.create_time &lt;= #{endTime}
+		</if>
+		<if test="dstatus !=null and dstatus != -1">
+			and tr.status = #{dstatus}
+		</if>
+		order by pay.create_time desc 
+		<if test="startNum!=null and endNum !=null ">
+        	limit #{startNum},#{endNum}
+        </if>
+	</select>
+</mapper>

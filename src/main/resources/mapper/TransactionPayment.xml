@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smm.payCenter.dao.TransactionPaymentDao">
+	<select id="query" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.TransactionPayment">
+			SELECT a.payment_id AS paymentId, p.payment_no AS paymentNo, p.product_name AS productName, 
+					p.seller_company_name AS sellerCompanyName, p.buyer_company_name AS buyerCompanyName, 
+					p.deal_money AS dealMoney, r.freeze_money AS freezeMoney, a.audit_time AS auditTime,a.mall_audit_time as mallAuditTime,  
+					a.audit_status AS auditStatus, a.confirm_id AS confirmId , a.business_aduit_user as businessAuditUser  
+					FROM tr_confirm_audit a, tr_payment_record p, tr_freeze_record r 
+					WHERE a.payment_id = p.payment_id 
+					AND p.payment_id = r.payment_id 
+				    <if test="dstatus !=null and dstatus != -1">
+						and a.audit_status = ${dstatus}
+					</if>
+					<if test="startTime !=null and startTime != ''">
+						and a.mall_audit_time &gt;= #{startTime}
+					</if>
+					<if test="endTime !=null and endTime != ''">
+						and a.mall_audit_time  &lt;= #{endTime}
+					</if>
+					 order by a.payment_id desc 
+					<if test="startNum!=null and endNum !=null ">
+			        	limit ${startNum},${endNum}
+			        </if>
+	</select>
+	
+	<select id="queryCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT
+				  count(*)
+				FROM tr_confirm_audit a,
+				  tr_payment_record p,
+				  tr_freeze_record r
+				WHERE a.payment_id = p.payment_id
+				    AND p.payment_id = r.payment_id
+				    <if test="dstatus !=null and dstatus != -1">
+						and a.audit_status = ${dstatus}
+					</if>
+					<if test="startTime !=null and startTime != ''">
+						and a.audit_time &gt;= #{startTime}
+					</if>
+					<if test="endTime !=null and endTime != ''">
+						and a.audit_time  &lt;= #{endTime}
+					</if>
+	</select>
+	
+	<select id="queryDetailById"  parameterType="java.lang.Integer" resultType="com.smm.payCenter.domain.TransactionDetail">
+			SELECT
+				  r.payment_id			 		 AS paymentId,
+				  r.payment_no			 AS paymentNo,
+				  r.mall_order_id                AS mallOrderId,
+				  a.mall_audit_status            AS mallAuditStatus,
+				  a.mall_audit_reason            AS mallAuditReason,
+				  a.confirm_id                   AS confirmId,
+				  a.audit_status            AS  auditStatus,
+				  a.respository_status as respositoryStatus,
+				  a.business_aduit_user as businessAduitUser,
+				  r.create_time                  AS createTime,
+				  r.seller_company_name          AS sellerCompanyName,
+				  c1.user_account_no             AS sellUserAccountNo,
+				  r.buyer_company_name           AS buyerCompanyName,
+				  c2.user_account_no             AS buyUserAccountNo,
+				  r.product_name                 AS productName,
+				  r.product_detail               AS productDetail,
+				  r.product_num                  AS productNum,
+				  r.product_num_unit             AS productNumUnit,
+				  r.deal_money                   AS dealMoney,
+				  r.order_create_time               orderCreateTime,
+				  r.settlement_type              AS settlementType,
+				  r.deal_type                    AS dealType,
+				  r.invoice,
+				  r.payment_type                 AS paymentType,
+				  r.freeze_time                  AS freezeTime,
+				  r.payment_code                 AS paymentCode,
+				  r.payment_status               AS paymentStatus,
+				  r.done_time                    AS doneTime,
+				  r.verify_code                    AS verifyCode,
+				  r.buyer_user_id                AS buyerUserId,
+				  r.seller_user_id               AS sellerUserId
+			FROM tr_payment_record r,
+			  tr_confirm_audit a,
+			  user_pay_channel c1,
+			  user_pay_channel c2
+			WHERE r.payment_id = a.payment_id
+			    AND r.seller_pay_channel_id = c1.user_pay_channel_id
+			    AND r.buyer_pay_channel_id = c2.user_pay_channel_id
+			    AND a.confirm_id=#{id}
+	</select>
+	
+	
+		<select id="queryById"  parameterType="java.lang.Integer" resultType="com.smm.payCenter.domain.TransactionDetail">
+			SELECT
+				  r.payment_id			 		 AS paymentId,
+				  r.payment_no			 AS paymentNo,
+				  r.mall_order_id                AS mallOrderId,
+				  r.create_time                  AS createTime,
+				  r.seller_company_name          AS sellerCompanyName,
+				  c1.user_account_no             AS sellUserAccountNo,
+				  r.buyer_company_name           AS buyerCompanyName,
+				  c2.user_account_no             AS buyUserAccountNo,
+				  r.product_name                 AS productName,
+				  r.product_detail               AS productDetail,
+				  r.product_num                  AS productNum,
+				  r.product_num_unit             AS productNumUnit,
+				  r.deal_money                   AS dealMoney,
+				  r.order_create_time               orderCreateTime,
+				  r.settlement_type              AS settlementType,
+				  r.deal_type                    AS dealType,
+				  r.invoice,
+				  r.payment_type                 AS paymentType,
+				  r.freeze_time                  AS freezeTime,
+				  r.payment_code                 AS paymentCode,
+				  r.payment_status               AS paymentStatus,
+				  r.done_time                    AS doneTime,
+				  r.verify_code                    AS verifyCode,
+				  r.buyer_user_id                AS buyerUserId,
+				  r.seller_user_id               AS sellerUserId
+			FROM tr_payment_record r,
+			  user_pay_channel c1,
+			  user_pay_channel c2
+			WHERE r.seller_pay_channel_id = c1.user_pay_channel_id
+			    AND r.buyer_pay_channel_id = c2.user_pay_channel_id
+			    AND r.payment_id=#{id}
+	</select>
+	
+	
+  <update id="updateConfirmStatus" parameterType="java.util.Map">
+  	UPDATE tr_confirm_audit tr SET tr.audit_user_id =#{auditUserId} ,tr.audit_time =#{auditTime} ,
+  		tr.audit_status = 1 WHERE tr.confirm_id = #{confirmId}
+  </update>
+  <select id="queryConfirmStatus" parameterType="Integer" resultType="Integer">
+  select  audit_status from tr_confirm_audit WHERE confirm_id = #{confirmId} 
+  </select>
+  
+  <insert id="insertPaymentLog" parameterType="java.util.Map">
+	INSERT INTO s_payment_log 
+	( 
+	payment_id, 
+	operation_name, 
+	operation_time, 
+	operation_result,
+	opetation_desc, 
+	create_time
+	)
+	VALUES(
+	#{paymentId},
+	#{operationname},
+	#{operationtime},
+	#{operationresult},
+	#{desc},
+	#{createtime}
+	)
+  </insert>
+</mapper>

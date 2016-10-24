@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<!-- zTree 样式 -->
+<link
+	href="${request.getContextPath()}/Public/js/zTree/css/demo.css"
+	rel="stylesheet" type="text/css">
+<link
+	href="${request.getContextPath()}/Public/js/zTree/css/zTreeStyle.css"
+	rel="stylesheet" type="text/css">
+<style type="text/css">
+
+.input-inline_text {
+    display: inline-block;
+    width: 150px;
+    vertical-align: middle;
+}
+.modal-footer {
+    padding: 15px;
+    text-align: center;
+}
+
+div.zTreeDemoBackground {
+    width: 150px;
+    height: 40px;
+    text-align: left;
+}
+</style>
+</head>
+<body>
+<!-- 模态窗口编辑模板 -->
+<form action="" id="myform" class="form-horizontal form-bordered" novalidate="novalidate" method="post">
+<!-- 窗口标题开始 -->
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
+	<h4 class="modal-title">角色修改</h4>
+</div>
+<!-- 窗口标题结束-->
+<!-- 内容开始 -->
+<form role="form" class="form-horizontal" id="myFormItems" name="myFormItems">
+<div class="modal-body">
+	<div class="portlet-body form">
+		<div class="form-body">
+		  <div class="form-group">
+		    <label for="inputEmail3" class="col-sm-4 control-label">角色名称</label>
+		    <div class="col-sm-8">
+		      <input type="text" class="form-control input-inline_text" id="roleName" name="roleName" value="${roleName!''}" readonly="readonly" onblur="isName(this)">
+		    </div>
+		  </div>
+		  <input type="hidden" id="roleId" name="roleId" value="${roleId}">
+		  <div class="form-group">
+		  	<label for="inputPassword3" class="col-sm-4 control-label">权限</label>
+			<div class="col-sm-8">
+				<div class="zTreeDemoBackground left">
+					<input id="authorization"  placeholder="选择角色权限" class="form-control" type="text" readonly value=""  onclick="showMenu();">
+					<div id="menuContent" class="menuContent" style="display:none; position: absolute;z-index: 1">
+						<ul id="treeDemo" class="ztree" style="margin-top:0; width:180px;"></ul>
+					</div>
+				</div>
+				<textarea id="authorizations"  rows="8" class="form-control" readonly="readonly"></textarea>
+			</div>
+		  </div>
+		</div>
+	</div>
+</div>
+<input name="ids" id="ids" type="hidden" value="${ids!''}">
+<input name="treeNodeNames" id="treeNodeNames" type="hidden" value="${treeNodeNames!''}">
+</form>
+
+<!-- 内容结束 -->
+<!-- 底部按钮开始 -->
+<div class="modal-footer">
+	<button type="button" class="btn red  fa fa-check" onclick="submitForm();"> 确认</button>
+	<button type="button" class="btn default fa fa-times" data-dismiss="modal"> 取消</button>
+</div>
+<!-- 结束 -->
+
+</form>
+
+</body>
+<!-- 新增管理员-->
+<!-- zTree 插件-->
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript"
+	src="${request.getContextPath()}/Public/js/zTree/jquery.ztree.excheck-3.5.min.js"></script>
+<script>
+
+function submitForm(){
+	//alert($("#roleId").val());
+	//后台提交
+	$.ajax({
+    		type: "POST",
+    		url: "${request.getContextPath()}/sysManager/updRoleAndAuthorization.do",
+    		data:{"roleId":$("#roleId").val(),"menuIds":$("#ids").val()},
+    		dataType: "json",
+    		success: function(res){
+    			if(res.code=="success"){ 
+    				$(".editModal").modal('hide');
+    				$(".editModal").empty();
+   					CommonUtils.succModal2('系统提示','修改成功',"${request.getContextPath()}/sysManager/roleList.do");
+    			}
+    			else{
+    				CommonUtils.succModal('系统提示','修改失败',"${request.getContextPath()}/sysManager/roleList.do");
+    			}
+    		}
+   });
+}
+
+//定义树 
+var setting = {
+		async : {
+			enable : true,
+			type: "get",
+			url : "${request.getContextPath()}/sysManager/getTreeNodeChecked.do?roleId="+$("#roleId").val(),//更新管理员权限时候树节点初始化数据
+			error : function() {  
+                 alert('亲，资源加载失败！');  
+            }, 
+			autoParam : [ "id" ]
+		},
+		check: {
+			enable: true,
+			chkDisabledInherit:true
+		},
+        view: {
+            selectedMulti: true, //是否允许多选
+            autoCheckTrigger: true
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+           //	beforeCheck: beforeClick,
+            onCheck: onCheck
+        }
+    };
+
+	/* function beforeClick(treeId, treeNode, clickFlag){
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+		nodes = zTree.getCheckedNodes(true),
+		v = "";
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";//节点名称
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var cityObj = $("#authorizations");
+		cityObj.attr("value", v);
+	}
+ */
+	
+	//获取所有子节点
+	function getAllChildrenNodes(treeNode,result){ 
+	    if (treeNode.isParent) { 
+	      var childrenNodes = treeNode.children; 
+	      if (childrenNodes) { 
+	          for (var i = 0; i < childrenNodes.length; i++) { 
+	           if(childrenNodes[i].isParent){
+	            result = getAllChildrenNodes(childrenNodes[i], result); 
+	           }else{
+	            result += ',' + childrenNodes[i].id; 
+	           }
+	          } 
+	      } 
+	  } 
+	  return result; 
+	}
+	
+	function onClick(e, treeId, treeNode) {
+        hideMenu();
+         return false;
+    }
+	
+	//选定节点之后，赋值 
+ 	function onCheck(e, treeId, treeNode) {
+		var zTree = $.fn.zTree.getZTreeObj("treeDemo"),
+		nodes = zTree.getCheckedNodes(true),
+		v = "";
+		u = "";
+		for (var i=0, l=nodes.length; i<l; i++) {
+			v += nodes[i].name + ",";//节点名称
+			u += nodes[i].id + ",";//节点id
+		}
+		if (v.length > 0 ) v = v.substring(0, v.length-1);
+		var cityObj = $("#authorizations");
+		cityObj.attr("value", v);
+		
+		if (u.length > 0 ) u = u.substring(0, u.length-1);
+		var cityObj = $("#ids");
+		cityObj.attr("value",u);
+	} 
+
+	function showMenu() {
+		var cityObj = $("#authorization");
+		var cityOffset = $("#authorization").position();
+		//alert(cityOffset.left + "px---"+cityOffset.top+ "px");
+		//$("#menuContent").css({left:"220px", top:"135px"}).slideDown("fast");
+		$("#menuContent").css({left:cityOffset.left+"px", top:cityOffset.top+cityObj.outerHeight()+"px"}).slideDown("fast");
+		
+
+		$("body").bind("mousedown", onBodyDown);
+	}
+	function hideMenu() {
+		$("#menuContent").fadeOut("fast");
+		$("body").unbind("mousedown", onBodyDown);
+	}
+	function onBodyDown(event) {
+		if (!(event.target.id == "menuBtn" || event.target.id == "authorization" || event.target.id == "menuContent" || $(event.target).parents("#menuContent").length>0)) {
+			hideMenu();
+		}
+	}
+
+	//树初始化
+	$(document).ready(function(){
+		$.fn.zTree.init($("#treeDemo"), setting);
+		$("#authorizations").attr("value",$("#treeNodeNames").val());
+	});
+
+</script>
+</html>

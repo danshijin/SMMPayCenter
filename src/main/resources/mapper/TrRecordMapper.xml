@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.smm.payCenter.dao.trrecord.TrRecordDAO">
+	<resultMap id="trcashResultMap" type="com.smm.payCenter.domain.TrCashApply" >
+	    <id column="counter_fee" property="counter_fee" jdbcType="DECIMAL" />
+	    <result column="user_email" property="email" jdbcType="VARCHAR" />
+	    <result column="user_email" property="email" jdbcType="VARCHAR" />
+	    <result column="user_company_name" property="companyName" jdbcType="VARCHAR" />
+	    <result column="cash_money" property="cashMoney" jdbcType="DECIMAL" />
+	    <result column="cash_bank_name" property="bankName" jdbcType="VARCHAR" />
+	    <result column="cash_bank_no" property="bankNo" jdbcType="VARCHAR" />
+	    <result column="user_use_money" property="useMoney" jdbcType="DECIMAL" />
+	    <result column="replay_status" property="replayStatus" jdbcType="INTEGER" />
+		<result column="user_id" property="userId" jdbcType="INTEGER" />
+	    <result column="cash_bank_id" property="bankId" jdbcType="INTEGER" />
+	    
+	    <result column="apply_time" property="applyTime" jdbcType="VARCHAR" />
+		<result column="replay_time" property="replayTime" jdbcType="VARCHAR" />
+		<result column="smm_freeze_money" property="smmFreezeMoney" jdbcType="DECIMAL" />
+		 <result column="cash_No" property="cashNo" jdbcType="VARCHAR" />
+		 <result column="pay_channel_id" property="pay_channel_id" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <!-- 用户出金审核  -->
+    <select id="getList" resultMap="trcashResultMap" parameterType="java.util.Map">
+        SELECT 
+        id,
+        ta.user_id,
+        ta.pay_channel_id,
+        counter_fee,
+        user_email,
+        user_company_name,
+        cash_money,
+        cash_bank_name,
+        cash_bank_no,
+        user_use_money,
+        replay_status ,
+        apply_time,
+        replay_time,
+        smm_freeze_money ,
+        cash_No
+        FROM tr_cash_apply ta,user_pay_channel uc 
+		WHERE ta.user_id = uc.user_id  
+		<if test="dstatus !=null and dstatus !='' and dstatus ==1 "><!-- 页面状态为 1 待审核 -->
+			AND replay_status=0
+		</if>
+		<if test="dstatus !=null and dstatus !='' and dstatus ==2 "><!-- 页面状态为 2 已通过 -->
+			AND replay_status=1
+		</if>
+		<if test="dstatus !=null and dstatus !='' and dstatus ==3 "><!-- 页面状态为 3 已关闭 -->
+			AND replay_status=2
+			
+		</if>
+		<choose>
+			<when test="startTime !=null and startTime !='' and endTime!=null and endTime!='' "><!-- 申请时间 -->
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d') BETWEEN STR_TO_DATE(#{startTime},'%Y-%m-%d') AND STR_TO_DATE(#{endTime},'%Y-%m-%d')
+			</when>
+			<when test="startTime !=null and startTime !='' and (endTime==null or endTime=='')  ">
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d')&gt;=STR_TO_DATE(#{startTime},'%Y-%m-%d')
+			</when>
+			<when test="endTime!=null and endTime!='' and (startTime ==null or startTime =='')"> 
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d')&lt;=STR_TO_DATE(#{endTime},'%Y-%m-%d')
+			</when>
+			<otherwise>  
+            </otherwise> 
+		</choose> 
+		ORDER BY apply_time desc
+		<if test="startNum!=null and endNum !=null ">
+	       	limit ${startNum},${endNum}
+	    </if> 
+    </select>
+    
+    <select id="getObject" resultMap="trcashResultMap" parameterType="integer">
+    	SELECT id,counter_fee,cash_bank_id,user_id,cash_money FROM tr_cash_apply WHERE id = #{id}
+    </select>
+    
+    <select id="getSize" resultType="Integer" parameterType="java.util.Map">
+	   	SELECT count(*) FROM tr_cash_apply where 1 = 1 
+		<if test="dstatus !=null and dstatus !='' and dstatus ==1 "><!-- 页面状态为 1 待审核 -->
+			AND replay_status=0
+		</if>
+		<if test="dstatus !=null and dstatus !='' and dstatus ==2 "><!-- 页面状态为 2 已通过 -->
+			AND replay_status=1
+		</if>
+		<if test="dstatus !=null and dstatus !='' and dstatus ==3 "><!-- 页面状态为 3 已关闭 -->
+			AND replay_status=2
+		</if>
+		<choose>
+			<when test="startTime !=null and startTime !='' and endTime!=null and endTime!='' "><!-- 申请时间 -->
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d') BETWEEN STR_TO_DATE(#{startTime},'%Y-%m-%d') AND STR_TO_DATE(#{endTime},'%Y-%m-%d')
+			</when>
+			<when test="startTime !=null and startTime !='' and (endTime==null or endTime=='')  ">
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d')&gt;=STR_TO_DATE(#{startTime},'%Y-%m-%d')
+			</when>
+			<when test="endTime!=null and endTime!='' and (startTime ==null or startTime =='')"> 
+				AND DATE_FORMAT(apply_time,'%Y-%m-%d')&lt;=STR_TO_DATE(#{endTime},'%Y-%m-%d')
+			</when>
+			<otherwise>  
+            </otherwise> 
+		</choose> 
+    </select> 
+    
+    <update id="update" parameterType="java.util.Map">
+    	UPDATE tr_cash_apply 
+    	SET 
+    	<if test="trstatus !=null and trstatus !='' and trstatus ==1 "><!-- 状态为 1 已通过 -->
+			replay_status=1,
+		</if>
+		<if test="trstatus !=null and trstatus !='' and trstatus ==2 "><!-- 状态为 2 已关闭 -->
+			replay_status=2,
+		</if>
+		<!-- user_id=#{audit_user_id}  -->
+		replay_time=#{replay_time},replay_user_id=#{replay_user_id}
+    	where id=#{trid}
+    </update>
+    
+    <update id="updateUPC" parameterType="java.util.Map">
+	    UPDATE user_pay_channel 
+	    	SET 
+		use_money = use_money + #{totalMoney}, smm_freeze_money = smm_freeze_money - #{totalMoney}
+	    	WHERE user_id = #{userId}
+    </update>
+    
+    <update id="updateUA" parameterType="java.util.Map">
+    	UPDATE user_account SET use_money = use_money + #{totalMoney} WHERE user_id = #{userId}
+    </update>  
+    
+     <select id="queryTrRecordInfoByUserId" parameterType="java.util.Map" resultType="com.smm.payCenter.domain.TrRecordCompanyInfo">
+	  	SELECT
+		        SUM(CASE tr_type WHEN 0 THEN tr_money ELSE 0 END) AS money0,
+		        SUM(CASE tr_type WHEN 1 THEN tr_money ELSE 0 END) AS money1,
+		        SUM(CASE tr_type WHEN 2 THEN tr_money ELSE 0 END) AS money2,
+		        SUM(CASE tr_type WHEN 3 THEN tr_money ELSE 0 END) AS money3
+		      FROM tr_record WHERE DATE(tr_apply_time)= DATE(NOW()) AND user_id = #{userId}
+  </select>
+  
+  <select id="queryTotalMoneyByUserId" parameterType="java.util.Map" resultType="java.lang.Double">
+  	SELECT
+	    total_money AS totalMoney
+	         FROM tr_day_balance
+	                  WHERE DATE(create_time) = DATE(DATE_SUB(NOW(),INTERVAL 1 DAY)) AND account=#{userId}
+  </select>
+  
+  <select id="querySmmFreezeMoneyByUserId" parameterType="java.util.Map" resultType="java.lang.Double">
+	  	SELECT
+		  smm_freeze_money AS smmFreezeMoney
+		FROM  user_pay_channel 
+		    WHERE user_id = #{userId} AND pay_channel_id=#{payChannelId}
+  </select>
+    
+</mapper>

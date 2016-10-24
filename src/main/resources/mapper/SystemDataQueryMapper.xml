@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smm.payCenter.dao.SystemDataQueryDao" >
+	<sql id="systemDataQuerySql">
+	
+		SELECT ur.*,uc.user_account_no AS userAccountNo FROM (
+			SELECT rd.tr_apply_time trDate, rd.note, rd.user_company_name companyName, rd.opposit_company_name oppositCompanyName, 
+			CASE rd.tr_type WHEN 0 THEN ABS(rd.tr_money) WHEN 3 THEN ABS(rd.tr_money) END borrow, 
+			CASE rd.tr_type WHEN 1 THEN ABS(rd.tr_money) WHEN 2 THEN ABS(rd.tr_money) END loan, 
+			rd.user_freeze_money freezeMoney, rd.user_money userMoney, rd.user_freeze_money + rd.user_money totalMoney, 
+			rd.tr_type trType, self.user_name companyMail ,self.user_id userid 
+			FROM tr_record rd 
+			LEFT JOIN 
+			user_account self 
+			ON rd.user_id = self.user_id) ur 
+			LEFT JOIN 
+			user_pay_channel uc 
+			ON uc.user_id = ur.userid
+	
+	</sql>			
+	<select id="querySystemDataList" resultType="com.smm.payCenter.domain.SystemData" parameterType="java.util.Map">
+		 select  * from (
+	 		<include refid="systemDataQuerySql" />
+		) a  
+			where 1=1 
+			<if test="companyMail !=null and companyMail != ''">
+				and a.companyMail  like '%${companyMail}%'
+			</if>
+			<if test="companyName !=null and companyName != ''">
+				and a.companyName  like '%${companyName}%'
+			</if>
+			
+			<if test="startTrDate !=null and startTrDate != ''">
+				and DATE_FORMAT(a.trDate,'%Y-%m-%d %H:%i:%s')  &gt; DATE_FORMAT(#{startTrDate},'%Y-%m-%d %H:%i:%s')  
+			</if>
+			
+			<if test="endTrDate !=null and endTrDate != ''">
+				and DATE_FORMAT(a.trDate,'%Y-%m-%d %H:%i:%s')&lt;  DATE_FORMAT(#{endTrDate},'%Y-%m-%d %H:%i:%s')  
+			</if>
+			
+			<if test="selectConditions==1">
+					<if test="startValue !=null and startValue != ''">
+							and	a.userMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.userMoney  ${endOperator} #{endValue}
+					</if>
+			</if>
+			<if test="selectConditions==2">
+					<if test="startValue !=null and startValue != ''">
+							and	a.totalMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.totalMoney ${endOperator} #{endValue}	
+					</if>
+			</if>
+			
+			<if test="selectConditions==3">
+					<if test="startValue !=null and startValue != ''">
+							and	a.borrow ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.borrow ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=2
+			</if>
+			
+			<if test="selectConditions==4">
+					<if test="startValue !=null and startValue != ''">
+							and	a.loan ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.loan ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=3
+			</if>
+
+			
+			<if test="selectConditions==5">
+					<if test="startValue !=null and startValue != ''">
+							and	a.freezeMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.freezeMoney ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=5
+			</if>
+			ORDER BY a.trDate DESC 
+			<if test="startNum!=null and endNum !=null ">
+		       	limit ${startNum},${endNum}
+		    </if> 
+	</select>
+	
+	<select id="querySystemDataListTotalRecords" resultType="java.lang.Integer" parameterType="java.util.Map">
+
+
+		select count(*) from (
+			<include refid="systemDataQuerySql" />
+		) a  where 1=1 
+			<if test="companyMail !=null and companyMail != ''">
+				and a.companyMail  like '%${companyMail}%'
+			</if>
+			
+			
+			<if test="companyName !=null and companyName != ''">
+				and a.companyName  like '%${companyName}%'
+			</if>
+			
+			<if test="startTrDate !=null and startTrDate != ''">
+				and DATE_FORMAT(a.trDate,'%Y-%m-%d %H:%i:%s')  &gt; DATE_FORMAT(#{startTrDate},'%Y-%m-%d %H:%i:%s')  
+			</if>
+			
+			<if test="endTrDate !=null and endTrDate != ''">
+				and DATE_FORMAT(a.trDate,'%Y-%m-%d %H:%i:%s')&lt;  DATE_FORMAT(#{endTrDate},'%Y-%m-%d %H:%i:%s')  
+			</if>
+			<if test="selectConditions==1">
+					<if test="startValue !=null and startValue != ''">
+							and	a.userMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.userMoney  ${endOperator} #{endValue}
+					</if>
+			</if>
+			<if test="selectConditions==2">
+					<if test="startValue !=null and startValue != ''">
+							and	a.totalMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.totalMoney ${endOperator} #{endValue}	
+					</if>
+			</if>
+			
+			<if test="selectConditions==3">
+					<if test="startValue !=null and startValue != ''">
+							and	a.borrow ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.borrow ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=2
+			</if>
+			
+			<if test="selectConditions==4">
+					<if test="startValue !=null and startValue != ''">
+							and	a.loan ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.loan ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=3
+			</if>
+			<if test="selectConditions==5">
+					<if test="startValue !=null and startValue != ''">
+							and	a.freezeMoney ${startOperator} #{startValue}	
+					</if>
+					<if test="endValue !=null and endValue != ''">
+							and	a.freezeMoney ${endOperator} #{endValue}	
+					</if>
+					and	a.trType=5
+			</if>
+	</select>
+</mapper>
